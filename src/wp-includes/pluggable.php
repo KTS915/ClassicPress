@@ -2195,7 +2195,7 @@ if ( !function_exists( 'wp_hash_password' ) ) :
  * @return string The hash string of the password
  */
 function wp_hash_password( $password ) {
-	$options = apply_filters( 'wp_hash_password_options', [] );
+	$options = apply_filters( 'wp_hash_password_options', array() );
 	return password_hash( $password, PASSWORD_BCRYPT, $options ) ;
 }
 endif;
@@ -2399,6 +2399,8 @@ function wp_set_password( $password, $user_id ) {
 	$wpdb->update( $wpdb->users, array( 'user_pass' => $hash, 'user_activation_key' => '' ), array( 'ID' => $user_id ) );
 
 	wp_cache_delete( $user_id, 'users' );
+
+	return $hash;
 }
 endif;
 

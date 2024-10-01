@@ -72,6 +72,37 @@ get_current_screen()->set_help_sidebar(
 	'<p>' . __( '<a href="https://wordpress.org/support/forums/">Support forums</a>' ) . '</p>'
 );
 
+// Get the maximum upload size.
+$max_upload_size = wp_max_upload_size();
+if ( ! $max_upload_size ) {
+	$max_upload_size = 0;
+}
+
+// Get a list of allowed mime types.
+$allowed_mimes = get_allowed_mime_types();
+$mimes_list = implode( ',', $allowed_mimes );
+
+// Get the user's preferred items per page.
+$user = get_current_user_id();
+$per_page = get_user_meta( $user, 'media_grid_per_page', true );
+if ( empty( $per_page ) || $per_page < 1 ) {
+	$per_page = 80;
+}
+
+// Fetch media items.
+$paged = isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1;
+$attachment_args = array(
+	'post_type'      => 'attachment',
+	'post_status'    => 'inherit',
+	'posts_per_page' => $per_page,
+	'paged'          => $paged,
+);
+$attachments = new WP_Query( $attachment_args );
+
+$total_pages = (int) $attachments->max_num_pages;
+$prev_page   = ( $paged === 1 ) ? $paged : $paged - 1;
+$next_page   = ( $paged === $total_pages ) ? $paged : $paged + 1;
+
 // These are the widgets grouped by sidebar.
 $sidebars_widgets = wp_get_sidebars_widgets();
 
@@ -546,6 +577,195 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 		<button class="button button-primary widgets-chooser-add"><?php _e( 'Add Widget' ); ?></button>
 	</div>
 </div>
+
+<dialog id="widget-modal">
+	<div tabindex="0" class="media-modal wp-core-ui" aria-labelledby="media-frame-title">
+		<button type="button" class="media-modal-close">
+			<span class="media-modal-icon">
+				<span class="screen-reader-text">Close dialog</span>
+			</span>
+		</button>
+			
+		<div class="media-modal-content" role="document">
+			<div class="media-frame mode-select wp-core-ui media-widget" id="__wp-uploader-id-0">
+				<div class="media-frame-title" id="media-frame-title">
+					<h1>Add Image</h1>
+				</div>
+				<h2 class="media-frame-menu-heading">Actions</h2>
+				<button type="button" class="button button-link media-frame-menu-toggle" aria-expanded="false">Menu<span class="dashicons dashicons-arrow-down" aria-hidden="true"></span></button>
+
+				<div class="media-frame-menu">
+					<div role="tablist" aria-orientation="vertical" class="media-menu">
+						<button type="button" role="tab" class="media-menu-item active" id="menu-item-insert" aria-selected="true">Add Image</button>
+						<div role="presentation" class="separator"></div>
+						<button type="button" role="tab" class="media-menu-item" id="menu-item-embed" aria-selected="false" tabindex="-1">Insert from URL</button>
+					</div>
+				</div>
+
+				<div class="media-frame-tab-panel" role="tabpanel" aria-labelledby="menu-item-insert" tabindex="0">
+					<div class="media-frame-router">
+						<div role="tablist" aria-orientation="horizontal" class="media-router">
+							<button type="button" role="tab" class="media-menu-item" id="menu-item-upload" aria-selected="false" tabindex="-1">Upload files</button>
+							<button type="button" role="tab" class="media-menu-item active" id="menu-item-browse" aria-selected="true">Media Library</button>
+						</div>
+					</div>
+					<div class="media-frame-content" role="tabpanel" aria-labelledby="menu-item-browse" tabindex="0" data-columns="9">
+						<div class="attachments-browser has-load-more">
+							<div class="media-toolbar">
+								<div class="media-toolbar-secondary">
+									<h2 class="media-attachments-filter-heading">Filter media</h2>
+									<div style="margin-top: 3em">
+
+										<?php
+										// Select dropdown boxes
+										$list_table = _get_list_table( 'WP_Media_List_Table' );
+										$list_table->months_dropdown( 'attachment' );
+										$list_table->media_categories_dropdown( 'attachment' );
+										?>
+
+									</div>
+								</div>
+
+								<div class="media-toolbar-primary search-form">
+									<label for="media-search-input" class="media-search-input-label">Search</label>
+									<input type="search" id="media-search-input" class="search">
+								</div>
+
+								<div class="media-toolbar-tertiary">
+									<h2 class="screen-reader-text"><?php esc_html_e( 'Media items navigation' ); ?></h2>
+									<div class="tablenav-pages">
+										<span class="displaying-num">
+						
+											<?php
+											/* translators: %s: Number of media items showing */
+											printf( __( '%s items' ), esc_html( count( $attachments->posts ) ) );
+											?>
+
+										</span>
+										<span class="pagination-links">						
+											<a class="first-page button" href="<?php echo admin_url( '/upload.php?paged=1' ); ?>"
+												<?php
+												if ( $paged === 1 ) {
+													echo 'disabled inert';
+												}
+												?>
+											>
+												<span class="screen-reader-text"><?php esc_html_e( 'First page' ); ?></span><span aria-hidden="true">«</span>
+											</a>
+											<a class="prev-page button" href="<?php echo admin_url( '/upload.php?paged=' . $prev_page ); ?>"
+												<?php
+												if ( $paged === 1 ) {
+													echo 'disabled inert';
+												}
+												?>
+											>
+												<span class="screen-reader-text"><?php esc_html_e( 'Previous page' ); ?></span><span aria-hidden="true">‹</span>
+											</a>
+											<span class="paging-input">
+												<label for="current-page-selector" class="screen-reader-text"><?php esc_html_e( 'Current Page' ); ?></label>
+												<input class="current-page" id="current-page-selector" type="text" name="paged" value="<?php echo esc_attr( $paged ); ?>" size="4" aria-describedby="table-paging">
+												<span class="tablenav-paging-text"> <?php esc_html_e( 'of' ); ?> <span class="total-pages"><?php echo esc_html( $total_pages ); ?></span></span>
+											</span>
+											<a class="next-page button" href="<?php echo admin_url( '/upload.php?paged=' . $next_page ); ?>"
+												<?php
+												if ( $paged === $next_page ) {
+													echo 'disabled inert';
+												}
+												?>
+											>
+												<span class="screen-reader-text"><?php esc_html_e( 'Next page' ); ?></span><span aria-hidden="true">›</span>
+											</a>
+											<a class="last-page button" href="<?php echo admin_url( '/upload.php?paged=' . $total_pages ); ?>"
+												<?php
+												if ( $paged === $next_page ) {
+													echo 'disabled inert';
+												}
+												?>
+											>
+												<span class="screen-reader-text"><?php esc_html_e( 'Last page' ); ?></span><span aria-hidden="true">»</span>
+											</a>
+										</span>
+									</div>
+								<br class="clear">
+							</div>
+						</div>
+							
+						<h2 class="media-views-heading screen-reader-text">Media list</h2>
+						<div class="attachments-wrapper">
+							<div id="media-grid">
+								<ul class="media-grid-view">
+									<?php // populated by JS after call to fetch API ?>
+								</ul>
+								<div class="load-more-wrapper">
+									<p class="load-more-count">
+										<?php // populated, if applicable, by JS after call to fetch API ?>
+									</p>
+									<p class="no-media" hidden>
+										<?php // populated, if applicable, by JS after call to fetch API ?>
+									</p>
+								</div>
+							</div>
+						</div>
+
+						<div class="media-sidebar">
+							<div class="media-uploader-status" style="display: none;">
+								<h2>Uploading</h2>
+								<div class="media-progress-bar">
+									<div></div>
+								</div>
+								<div class="upload-details">
+									<span class="upload-count">
+										<span class="upload-index"></span> / <span class="upload-total"></span>
+									</span>
+									<span class="upload-detail-separator">–</span>
+									<span class="upload-filename"></span>
+								</div>
+								<div class="upload-errors"></div>
+								<button type="button" class="button upload-dismiss-errors">Dismiss errors</button>
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+			<h2 class="media-frame-actions-heading screen-reader-text">Selected media actions</h2>
+			<div class="media-frame-toolbar">
+				<div class="media-toolbar">
+					<div class="media-toolbar-secondary"></div>
+					<div class="media-toolbar-primary search-form">
+						<button type="button" class="button media-button button-primary button-large media-button-insert" disabled>Add to Widget</button>
+					</div>
+				</div>
+			</div>
+
+
+			
+			<div class="uploader-inline" data-allowed-mimes="<?php echo esc_attr( $mimes_list ); ?>" hidden inert>
+				<button type="button" class="close dashicons dashicons-no">
+					<span class="screen-reader-text">Close uploader</span>
+				</button>
+
+				<input type="file" id="filepond" class="filepond" name="filepond" multiple data-allow-reorder="true" data-max-file-size="<?php echo esc_attr( size_format( $max_upload_size ) ); ?>">
+				<input id="ajax-url" value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>" hidden>
+				<?php wp_nonce_field( 'media-form' ); ?>
+
+				<div class="post-upload-ui" id="post-upload-info">
+					<p class="max-upload-size">
+
+						<?php
+						/* translators: %s: Maximum allowed file size. */
+						printf( __( 'Maximum upload file size: %s.' ), esc_html( size_format( $max_upload_size ) ) );
+						?>
+
+					</p>
+				</div>
+			</div>
+
+
+
+		</div>
+	</div>
+</dialog>
 
 <?php
 

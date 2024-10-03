@@ -568,6 +568,7 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 <?php wp_nonce_field( 'save-sidebar-widgets', '_wpnonce_widgets', false ); ?>
 </form>
 <br class="clear">
+<?php wp_nonce_field( 'media_grid', 'media_grid_nonce' ); ?>
 </div>
 
 <div class="widgets-chooser">
@@ -580,7 +581,7 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 
 <dialog id="widget-modal">
 	<div tabindex="0" class="media-modal wp-core-ui" aria-labelledby="media-frame-title">
-		<button type="button" class="media-modal-close">
+		<button type="button" id="media-modal-close" class="media-modal-close" autofocus>
 			<span class="media-modal-icon">
 				<span class="screen-reader-text">Close dialog</span>
 			</span>
@@ -609,6 +610,7 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 							<button type="button" role="tab" class="media-menu-item active" id="menu-item-browse" aria-selected="true">Media Library</button>
 						</div>
 					</div>
+
 					<div class="media-frame-content" role="tabpanel" aria-labelledby="menu-item-browse" tabindex="0" data-columns="9">
 						<div class="attachments-browser has-load-more">
 							<div class="media-toolbar">
@@ -708,6 +710,147 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 						</div>
 
 						<div class="media-sidebar">
+							<div class="attachment-details save-ready">
+								<h3><?php esc_html_e( 'Attachment Details' ); ?></h3>
+								<div class="attachment-info">
+									<div class="details">
+										<div class="filename"><strong><span class="screen-reader-text"><?php esc_html_e( 'File name:' ); ?></span> <span class="attachment-filename"></span></strong></div>
+										<div class="uploaded">
+											<span class="screen-reader-text"><?php esc_html_e( 'Uploaded on:' ); ?></span> <span class="attachment-date">
+										</div>
+										<div class="file-size"><span class="screen-reader-text"><?php esc_html_e( 'File size:' ); ?></span> <span class="attachment-filesize"></div>
+										<div class="dimensions"><span class="screen-reader-text"><?php esc_html_e( 'Dimensions:' ); ?></span> <span class="attachment-dimensions"></div>
+									
+										<div>
+										<a id="edit-more" href=""><?php esc_html_e( 'Edit details' ); ?></a>
+										</div>
+										<div>
+											<button type="button" class="button-link delete-attachment"><?php esc_html_e( 'Delete permanently' ); ?></button>
+										</div>
+
+										<div class="compat-meta"></div>
+									</div>
+								</div>
+
+								<?php
+								/**
+								 * This action is fired after the details list
+								 * within the dialog modal is printed to the page.
+								 *
+								 * @since CP-2.3.0
+								 */
+								do_action( 'cp_media_modal_after_details' );
+								?>
+
+								<div class="settings">
+									<span class="setting alt-text has-description" data-setting="alt">
+										<label for="attachment-details-two-column-alt-text" class="name"><?php esc_html_e( 'Alt Text' ); ?></label>
+										<textarea id="attachment-details-two-column-alt-text" aria-describedby="alt-text-description"></textarea>
+									</span>
+									<p class="description" id="alt-text-description"><a href="https://www.w3.org/WAI/tutorials/images/decision-tree" target="_blank" rel="noopener"><?php esc_html_e( 'Learn how to describe the purpose of the image' ); ?><span class="screen-reader-text"> <?php esc_html_e( '(opens in a new tab)' ); ?></span></a><?php esc_html_e( '. Leave empty if the image is purely decorative.' ); ?></p>
+									<span class="setting" data-setting="title">
+										<label for="attachment-details-two-column-title" class="name"><?php esc_html_e( 'Title' ); ?></label>
+										<input type="text" id="attachment-details-two-column-title" value="">
+									</span>
+									<span class="setting settings-save-status" role="status">
+										<span id="details-saved" class="success hidden" aria-hidden="true"><?php esc_html_e( 'Saved!' ); ?></span>
+									</span>
+									<span class="setting" data-setting="caption">
+										<label for="attachment-details-two-column-caption" class="name"><?php esc_html_e( 'Caption' ); ?></label>
+										<textarea id="attachment-details-two-column-caption"></textarea>
+									</span>
+									<span class="setting" data-setting="description">
+										<label for="attachment-details-two-column-description" class="name"><?php esc_html_e( 'Description' ); ?></label>
+										<textarea id="attachment-details-two-column-description"></textarea>
+									</span>
+									<span class="setting" data-setting="url">
+										<label for="attachment-details-two-column-copy-link" class="name"><?php esc_html_e( 'File URL' ); ?></label>
+										<input type="text" class="attachment-details-copy-link" id="attachment-details-two-column-copy-link" value="" readonly="">
+										<span class="copy-to-clipboard-container">
+											<button type="button" class="button button-small copy-attachment-url media-library" data-clipboard-target="#attachment-details-two-column-copy-link"><?php esc_html_e( 'Copy URL to clipboard' ); ?></button>
+											<span class="success hidden" aria-hidden="true"><?php esc_html_e( 'Copied!' ); ?></span>
+										</span>
+									</span>
+
+									<?php
+									/**
+									 * This action is fired before the inputs
+									 * and textareas within the dialog modal
+									 * are printed to the page.
+									 *
+									 * @since CP-2.3.0
+									 */
+									do_action( 'cp_media_modal_before_media_menu_order' );
+									?>
+
+									<div class="attachment-compat"></div>
+									<span class="setting settings-save-status" role="status">
+										<span id="tax-saved" class="success hidden" aria-hidden="true"><?php esc_html_e( 'Taxonomy updated successfully!' ); ?></span>
+									</span>
+
+									<?php
+									/**
+									 * This action is fired after the post tags
+									 * list within the dialog modal is printed
+									 * to the page.
+									 *
+									 * @since CP-2.3.0
+									 */
+									do_action( 'cp_media_modal_after_media_post_tags' );
+									?>
+
+								</div>
+
+								<div class="attachment-display-settings">
+									<h2><?php esc_html_e( 'Attachment Display Settings' ); ?></h2>
+
+									<span class="setting align">
+										<label for="attachment-display-settings-alignment" class="name"><?php esc_html_e( 'Alignment' ); ?></label>
+										<select id="attachment-display-settings-alignment" class="alignment" data-setting="align">
+											<option value="left"><?php esc_html_e( 'Left' ); ?></option>
+											<option value="center"><?php esc_html_e( 'Center' ); ?></option>
+											<option value="right"><?php esc_html_e( 'Right' ); ?></option>
+											<option value="none" selected=""><?php esc_html_e( 'None' ); ?></option>
+										</select>
+									</span>
+
+									<span class="setting">
+										<label for="attachment-display-settings-link-to" class="name"><?php esc_html_e( 'Link To' ); ?></label>
+										<select id="attachment-display-settings-link-to" class="link-to" data-setting="link">
+											<option value="none" selected=""><?php esc_html_e( 'None' ); ?></option>
+											<option value="file"><?php esc_html_e( 'Media File' ); ?></option>
+											<option value="post"><?php esc_html_e( 'Attachment Page' ); ?></option>
+											<option value="custom"><?php esc_html_e( 'Custom URL' ); ?></option>
+										</select>
+									</span>
+
+									<span class="setting">
+										<label for="attachment-display-settings-link-to-custom" class="name"><?php esc_html_e( 'URL' ); ?></label>
+										<input type="text" id="attachment-display-settings-link-to-custom" class="link-to-custom" data-setting="linkUrl">
+									</span>
+
+									<span class="setting">
+										<label for="attachment-display-settings-size" class="name"><?php _e( 'Size' ); ?></label>
+										<select id="attachment-display-settings-size" class="size" name="size" data-setting="size">
+
+											<?php
+											/** This filter is documented in wp-admin/includes/media.php */
+											$sizes = apply_filters(
+												'image_size_names_choose',
+												wp_get_registered_image_subsizes()
+											);
+
+											foreach ( $sizes as $value => $name ) :
+											?>
+												<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value ); ?>>
+													<?php echo esc_html( ucfirst( $value ) . ' &ndash; ' . $name['width'] . ' x '. $name['height'] ); ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+									</span>
+								</div>
+							</div>
+
 							<div class="media-uploader-status" style="display: none;">
 								<h2>Uploading</h2>
 								<div class="media-progress-bar">
@@ -728,6 +871,7 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 					</div>
 				</div>
 			</div>
+
 			<h2 class="media-frame-actions-heading screen-reader-text">Selected media actions</h2>
 			<div class="media-frame-toolbar">
 				<div class="media-toolbar">
@@ -737,8 +881,6 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 					</div>
 				</div>
 			</div>
-
-
 			
 			<div class="uploader-inline" data-allowed-mimes="<?php echo esc_attr( $mimes_list ); ?>" hidden inert>
 				<button type="button" class="close dashicons dashicons-no">
@@ -760,8 +902,6 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 					</p>
 				</div>
 			</div>
-
-
 
 		</div>
 	</div>

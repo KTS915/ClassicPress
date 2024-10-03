@@ -75,6 +75,7 @@ summary.widget-title::-webkit-details-marker {
 }
 
 /* Media Widgets */
+.wp-core-ui .widget-content .selected,
 .wp-core-ui .media-widget-control.selected .placeholder,
 .wp-core-ui .media-widget-control.selected .not-selected,
 .wp-core-ui .media-widget-control .selected {
@@ -90,6 +91,7 @@ summary.widget-title::-webkit-details-marker {
 	margin-top: 0;
 }
 
+.widget-content .media-widget-buttons .button,
 .media-widget-control .media-widget-buttons .button {
 	width: auto;
 	height: auto;
@@ -101,6 +103,7 @@ summary.widget-title::-webkit-details-marker {
 	margin-right: 8px;
 }
 
+.widget-content .attachment-media-view .button-add-media,
 .media-widget-control .attachment-media-view .button-add-media,
 .media-widget-control .placeholder {
 	border: 1px dashed #c3c4c7;
@@ -113,6 +116,7 @@ summary.widget-title::-webkit-details-marker {
 	width: 100%;
 }
 
+.widget-content .attachment-media-view .button-add-media,
 .media-widget-control .attachment-media-view .button-add-media {
 	cursor: pointer;
 	background-color: #f0f0f1;
@@ -133,6 +137,7 @@ summary.widget-title::-webkit-details-marker {
 	outline-offset: -2px;
 }
 
+.widget-content .media-widget-preview,
 .media-widget-control .media-widget-preview {
 	background: transparent;
 	text-align: center;
@@ -825,10 +830,10 @@ ul.CodeMirror-hints {
 
 
 
-/* Media items in grid */
+/* Media items in grid *
 dialog {
 	display: block;
-}
+}*/
 .widgets-php .attachments-browser .media-toolbar {
 	height: 110px;
 }
@@ -869,7 +874,8 @@ dialog {
 	z-index: 9999999999;
 	tabindex: 1;
 }
-.uploader-inline .close:focus {
+.uploader-inline .close,
+.widget-content .attachment-media-view:focus-within {
 	outline: 2px solid #2271b1;
 }
 .dashicons-no::before {
@@ -1087,8 +1093,9 @@ dialog {
 .edit-attachment-frame .attachment-info {
 	height: 84.5vh;
 }
-.edit-attachment-frame .attachment-details {
+.media-sidebar .attachment-details {
 	position: relative;
+	display: none;
 }
 .attachment-details .setting.has-description {
 	margin-bottom: 5px;
@@ -1154,10 +1161,6 @@ dialog {
 .attachment-details .attachment-info .copy-to-clipboard-container {
 	float: none;
 	margin: 3em 0 0 35%;
-}
-.attachment-info {
-	line-height: 1.5;
-	color: #646970;
 }
 .media-modal .delete-attachment,
 .media-modal .trash-attachment,

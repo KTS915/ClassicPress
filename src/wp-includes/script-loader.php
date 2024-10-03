@@ -1243,6 +1243,25 @@ function wp_default_scripts( $scripts ) {
 		$scripts->set_translations( 'admin-widgets' );
 
 		$scripts->add( 'media-widgets', "/wp-admin/js/widgets/media-widgets$suffix.js", array( 'jquery', 'media-models', 'media-views', 'wp-api-request' ) );
+		did_action( 'init' ) && $scripts->localize(
+			'media-widgets',
+			'_wpMediaGridSettings',
+			array( /* These are just placeholders copied from elsewhere and need revisiting */
+				'by'               => __( 'by' ),
+				'pixels'           => __( 'pixels' ),
+				'deselect'         => __( 'Deselect' ),
+				'failed_update'    => __( 'Failed to update media:' ),
+				'error'            => __( 'Error:' ),
+				'upload_failed'    => __( 'Upload failed' ),
+				'tap_close'        => __( 'Tap to close' ),
+				'new_filename'     => __( 'Enter new filename' ),
+				'invalid_type'     => __( 'Invalid file type' ),
+				'check_types'      => __( 'Check the list of accepted file types.' ),
+				'delete_failed'    => __( 'Failed to delete attachment.' ),
+				'confirm_delete'   => __( "You are about to permanently delete this item from your site.\nThis action cannot be undone.\n'Cancel' to stop, 'OK' to delete." ),
+				'confirm_multiple' => __( "You are about to permanently delete these items from your site.\nThis action cannot be undone.\n'Cancel' to stop, 'OK' to delete." ),
+			)
+		);
 		$scripts->add_inline_script( 'media-widgets', 'wp.mediaWidgets.init();', 'after' );
 
 		$scripts->add( 'media-audio-widget', "/wp-admin/js/widgets/media-audio-widget$suffix.js", array( 'media-widgets', 'media-audiovideo' ) );

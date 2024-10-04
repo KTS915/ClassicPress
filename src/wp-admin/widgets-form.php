@@ -840,12 +840,22 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 												wp_get_registered_image_subsizes()
 											);
 
-											foreach ( $sizes as $value => $name ) :
-											?>
+											foreach ( $sizes as $value => $name ) {
+												// Don't use random sizes that have not been explicitly registered
+												$exploded = explode( 'x', $value );
+												if ( is_numeric( $exploded[0] ) ) {
+													continue;
+												}
+												?>
+
 												<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value ); ?>>
 													<?php echo esc_html( ucfirst( $value ) . ' &ndash; ' . $name['width'] . ' x '. $name['height'] ); ?>
 												</option>
-											<?php endforeach; ?>
+												
+												<?php
+											}
+											?>
+
 										</select>
 									</span>
 								</div>

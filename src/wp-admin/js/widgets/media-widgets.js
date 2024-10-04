@@ -441,10 +441,33 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	} );
 
 	/* Re-arrange fields to each media widget when first created */
-	document.addEventListener( 'widget-added', function( event ) {
-		var control = event.detail.widget.querySelector( '.media-widget-control' );
+	document.addEventListener( 'widget-added', function( event ) {console.log(event);
+		var split, id, mediaWidgetType,
+			control = event.detail.widget.querySelector( '.media-widget-control' ),
+			widgetID = event.detail.widget.id;
+
 		if ( control != null ) {
 			event.detail.widget.querySelector( '.widget-content' ).before( control );
+			splitted = widgetID.split( 'media_' )[1];
+			splitted = splitted.split( '-' );
+			mediaWidgetType = 'media_' + splitted[0];
+			id = parseInt( splitted[1] );
+			
+			event.detail.widget.querySelector( '.widget-content' ).innerHTML = '<input type="hidden" data-property="size" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][size]" id="widget-' + mediaWidgetType + '-' + id + '-size" value="medium">' +
+			'<input type="hidden" data-property="width" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][width]" id="widget-' + mediaWidgetType + '-' + id + '-width" value="0">' +
+			'<input type="hidden" data-property="height" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][height]" id="widget-' + mediaWidgetType + '-' + id + '-height" value="0">' +
+			'<input type="hidden" data-property="caption" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][caption]" id="widget-' + mediaWidgetType + '-' + id + '-caption" value="">' +
+			'<input type="hidden" data-property="alt" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][alt]" id="widget-' + mediaWidgetType + '-' + id + '-alt" value="">' +
+			'<input type="hidden" data-property="link_type" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][link_type]" id="widget-' + mediaWidgetType + '-' + id + '-link_type" value="custom">' +
+			'<input type="hidden" data-property="link_url" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][link_url]" id="widget-' + mediaWidgetType + '-' + id + '-link_url" value="">' +
+			'<input type="hidden" data-property="image_classes" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][image_classes]" id="widget-' + mediaWidgetType + '-' + id + '-image_classes" value="">' +
+			'<input type="hidden" data-property="link_classes" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][link_classes]" id="widget-' + mediaWidgetType + '-' + id + '-link_classes" value="">' +
+			'<input type="hidden" data-property="link_rel" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][link_rel]" id="widget-' + mediaWidgetType + '-' + id + '-link_rel" value="">' +
+			'<input type="hidden" data-property="link_target_blank" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][link_target_blank]" id="widget-' + mediaWidgetType + '-' + id + '-link_target_blank" value="">' +
+			'<input type="hidden" data-property="image_title" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][image_title]" id="widget-' + mediaWidgetType + '-' + id + '-image_title" value="">' +
+			'<input type="hidden" data-property="attachment_id" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][attachment_id]" id="widget-' + mediaWidgetType + '-' + id + '-attachment_id" value="0">' +
+			'<input type="hidden" data-property="url" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][url]" id="widget-' + mediaWidgetType + '-' + id + '-url" value="">' +
+			'<input type="hidden" data-property="title" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][title]" id="widget-' + mediaWidgetType + '-' + id + '-title" value="">';
 		}
 	} );
 
@@ -520,31 +543,6 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		removeImageEditWrap();
 	} );
 
-
-
-/*
-			var div = document.createElement( 'div' ),
-				index = widget.id;
-
-			div.className = 'widget-content';
-
-			div.innerHTML = '<input type="hidden" data-property="size" class="media-widget-instance-property" name="widget-media_image[7][size]" id="widget-media_image-7-size" value="medium">' +
-			'<input type="hidden" data-property="width" class="media-widget-instance-property" name="widget-media_image[7][width]" id="widget-media_image-7-width" value="0">' +
-			'<input type="hidden" data-property="height" class="media-widget-instance-property" name="widget-media_image[7][height]" id="widget-media_image-7-height" value="0">' +
-			'<input type="hidden" data-property="caption" class="media-widget-instance-property" name="widget-media_image[7][caption]" id="widget-media_image-7-caption" value="">' +
-			'<input type="hidden" data-property="alt" class="media-widget-instance-property" name="widget-media_image[7][alt]" id="widget-media_image-7-alt" value="">' +
-			'<input type="hidden" data-property="link_type" class="media-widget-instance-property" name="widget-media_image[7][link_type]" id="widget-media_image-7-link_type" value="custom">' +
-			'<input type="hidden" data-property="link_url" class="media-widget-instance-property" name="widget-media_image[7][link_url]" id="widget-media_image-7-link_url" value="">' +
-			'<input type="hidden" data-property="image_classes" class="media-widget-instance-property" name="widget-media_image[7][image_classes]" id="widget-media_image-7-image_classes" value="">' +
-			'<input type="hidden" data-property="link_classes" class="media-widget-instance-property" name="widget-media_image[7][link_classes]" id="widget-media_image-7-link_classes" value="">' +
-			'<input type="hidden" data-property="link_rel" class="media-widget-instance-property" name="widget-media_image[7][link_rel]" id="widget-media_image-7-link_rel" value="">' +
-			'<input type="hidden" data-property="link_target_blank" class="media-widget-instance-property" name="widget-media_image[7][link_target_blank]" id="widget-media_image-7-link_target_blank" value="">' +
-			'<input type="hidden" data-property="image_title" class="media-widget-instance-property" name="widget-media_image[7][image_title]" id="widget-media_image-7-image_title" value="">' +
-			'<input type="hidden" data-property="attachment_id" class="media-widget-instance-property" name="widget-media_image[7][attachment_id]" id="widget-media_image-7-attachment_id" value="0">' +
-			'<input type="hidden" data-property="url" class="media-widget-instance-property" name="widget-media_image[7][url]" id="widget-media_image-7-url" value="">' +
-			'<input type="hidden" data-property="title" class="media-widget-instance-property" name="widget-media_image[7][title]" id="widget-media_image-7-title" value="">';
-		}
-	} );
 
 	/**
 	 * Copies the attachment URL to the clipboard.

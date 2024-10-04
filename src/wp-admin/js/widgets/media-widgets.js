@@ -9,6 +9,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	var pond, itemID, focusID,
 		{ FilePond } = window, // import FilePond
 		widgetType = 'media_image',
+		mediaWidgets = document.querySelectorAll( '.media-widget-control' ),
 		queryParams = new URLSearchParams( window.location.search ),
 		uploader = document.querySelector( '.uploader-inline' ),
 		inputElement = document.getElementById( 'filepond' ),
@@ -432,6 +433,20 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			document.querySelector( '.attachment-details' ).removeAttribute( 'inert' );
 		}
 	}
+	
+	/* Re-arrange fields to media widgets on page load */
+	mediaWidgets.forEach( function( mediaWidget ) {
+		var widget = mediaWidget.closest( '.widget' );
+		widget.querySelector( '.widget-content' ).before( widget.querySelector( '.media-widget-control' ) );
+	} );
+
+	/* Re-arrange fields to each media widget when first created */
+	document.addEventListener( 'widget-added', function( event ) {
+		var control = event.detail.widget.querySelector( '.media-widget-control' );
+		if ( control != null ) {
+			event.detail.widget.querySelector( '.widget-content' ).before( control );
+		}
+	} );
 
 	// Add event listeners for changing the selection of items displayed
 	dateFilter.addEventListener( 'change', updateGrid );
@@ -470,14 +485,26 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	/* Add item(s) to widget */
 	addButton.addEventListener( 'click', function() {
 		document.querySelectorAll( '.media-item.selected' ).forEach( function( selectedItem ) {
-			var widgetItem = selectedItem.querySelector( 'img' );
-			widgetItem.className = 'attachment-thumb';
-			document.getElementById( focusID ).querySelector( '.attachment-media-view' ).remove();
+			var widgetItem;
+
+			if ( widgetType === 'media_audio' ) {
+				widgetItem = '';
+			} else if ( widgetType === 'media_video' ) {
+				widgetItem = '';
+			} else {
+				widgetItem = selectedItem.querySelector( 'img' );
+				widgetItem.className = 'attachment-thumb';
+			}
+
+			if ( document.getElementById( focusID ).querySelector( '.attachment-media-view' ) != null ) {
+				document.getElementById( focusID ).querySelector( '.attachment-media-view' ).remove();
+			}
+
 			document.getElementById( focusID ).querySelector( '.media-widget-preview' ).classList.add( widgetType );
 			document.getElementById( focusID ).querySelector( '.media-widget-preview' ).classList.add( 'populated' );
 			document.getElementById( focusID ).querySelector( '.media-widget-preview' ).append( widgetItem );
 			document.getElementById( focusID ).querySelector( '.media-widget-buttons' ).style.display = '';
-			document.getElementById( focusID ).querySelector( '.widget-control-save' ).removeAttribute( 'disabled' );
+			document.getElementById( focusID ).dispatchEvent( new Event( 'change' ) );
 		} );
 		closeButton.click();
 	} );
@@ -493,6 +520,31 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		removeImageEditWrap();
 	} );
 
+
+
+/*
+			var div = document.createElement( 'div' ),
+				index = widget.id;
+
+			div.className = 'widget-content';
+
+			div.innerHTML = '<input type="hidden" data-property="size" class="media-widget-instance-property" name="widget-media_image[7][size]" id="widget-media_image-7-size" value="medium">' +
+			'<input type="hidden" data-property="width" class="media-widget-instance-property" name="widget-media_image[7][width]" id="widget-media_image-7-width" value="0">' +
+			'<input type="hidden" data-property="height" class="media-widget-instance-property" name="widget-media_image[7][height]" id="widget-media_image-7-height" value="0">' +
+			'<input type="hidden" data-property="caption" class="media-widget-instance-property" name="widget-media_image[7][caption]" id="widget-media_image-7-caption" value="">' +
+			'<input type="hidden" data-property="alt" class="media-widget-instance-property" name="widget-media_image[7][alt]" id="widget-media_image-7-alt" value="">' +
+			'<input type="hidden" data-property="link_type" class="media-widget-instance-property" name="widget-media_image[7][link_type]" id="widget-media_image-7-link_type" value="custom">' +
+			'<input type="hidden" data-property="link_url" class="media-widget-instance-property" name="widget-media_image[7][link_url]" id="widget-media_image-7-link_url" value="">' +
+			'<input type="hidden" data-property="image_classes" class="media-widget-instance-property" name="widget-media_image[7][image_classes]" id="widget-media_image-7-image_classes" value="">' +
+			'<input type="hidden" data-property="link_classes" class="media-widget-instance-property" name="widget-media_image[7][link_classes]" id="widget-media_image-7-link_classes" value="">' +
+			'<input type="hidden" data-property="link_rel" class="media-widget-instance-property" name="widget-media_image[7][link_rel]" id="widget-media_image-7-link_rel" value="">' +
+			'<input type="hidden" data-property="link_target_blank" class="media-widget-instance-property" name="widget-media_image[7][link_target_blank]" id="widget-media_image-7-link_target_blank" value="">' +
+			'<input type="hidden" data-property="image_title" class="media-widget-instance-property" name="widget-media_image[7][image_title]" id="widget-media_image-7-image_title" value="">' +
+			'<input type="hidden" data-property="attachment_id" class="media-widget-instance-property" name="widget-media_image[7][attachment_id]" id="widget-media_image-7-attachment_id" value="0">' +
+			'<input type="hidden" data-property="url" class="media-widget-instance-property" name="widget-media_image[7][url]" id="widget-media_image-7-url" value="">' +
+			'<input type="hidden" data-property="title" class="media-widget-instance-property" name="widget-media_image[7][title]" id="widget-media_image-7-title" value="">';
+		}
+	} );
 
 	/**
 	 * Copies the attachment URL to the clipboard.

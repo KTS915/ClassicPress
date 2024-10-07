@@ -9,6 +9,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	var pond, itemID, focusID,
 		{ FilePond } = window, // import FilePond
 		widgetType = 'media_image',
+		changeMedia = false,
 		mediaWidgets = document.querySelectorAll( '.media-widget-control' ),
 		queryParams = new URLSearchParams( window.location.search ),
 		uploader = document.querySelector( '.uploader-inline' ),
@@ -433,41 +434,24 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			document.querySelector( '.attachment-details' ).removeAttribute( 'inert' );
 		}
 	}
-	
-	/* Re-arrange fields to media widgets on page load */
-	mediaWidgets.forEach( function( mediaWidget ) {
-		var widget = mediaWidget.closest( '.widget' );
-		widget.querySelector( '.widget-content' ).before( widget.querySelector( '.media-widget-control' ) );
-	} );
 
-	/* Re-arrange fields to each media widget when first created */
-	document.addEventListener( 'widget-added', function( event ) {console.log(event);
-		var split, id, mediaWidgetType,
-			control = event.detail.widget.querySelector( '.media-widget-control' ),
-			widgetID = event.detail.widget.id;
+	/* Organize each media widget when first created */
+	document.addEventListener( 'widget-added', function( event ) {
+		var widget = event.detail.widget;
 
-		if ( control != null ) {
-			event.detail.widget.querySelector( '.widget-content' ).before( control );
-			splitted = widgetID.split( 'media_' )[1];
-			splitted = splitted.split( '-' );
-			mediaWidgetType = 'media_' + splitted[0];
-			id = parseInt( splitted[1] );
-			
-			event.detail.widget.querySelector( '.widget-content' ).innerHTML = '<input type="hidden" data-property="size" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][size]" id="widget-' + mediaWidgetType + '-' + id + '-size" value="medium">' +
-			'<input type="hidden" data-property="width" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][width]" id="widget-' + mediaWidgetType + '-' + id + '-width" value="0">' +
-			'<input type="hidden" data-property="height" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][height]" id="widget-' + mediaWidgetType + '-' + id + '-height" value="0">' +
-			'<input type="hidden" data-property="caption" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][caption]" id="widget-' + mediaWidgetType + '-' + id + '-caption" value="">' +
-			'<input type="hidden" data-property="alt" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][alt]" id="widget-' + mediaWidgetType + '-' + id + '-alt" value="">' +
-			'<input type="hidden" data-property="link_type" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][link_type]" id="widget-' + mediaWidgetType + '-' + id + '-link_type" value="custom">' +
-			'<input type="hidden" data-property="link_url" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][link_url]" id="widget-' + mediaWidgetType + '-' + id + '-link_url" value="">' +
-			'<input type="hidden" data-property="image_classes" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][image_classes]" id="widget-' + mediaWidgetType + '-' + id + '-image_classes" value="">' +
-			'<input type="hidden" data-property="link_classes" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][link_classes]" id="widget-' + mediaWidgetType + '-' + id + '-link_classes" value="">' +
-			'<input type="hidden" data-property="link_rel" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][link_rel]" id="widget-' + mediaWidgetType + '-' + id + '-link_rel" value="">' +
-			'<input type="hidden" data-property="link_target_blank" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][link_target_blank]" id="widget-' + mediaWidgetType + '-' + id + '-link_target_blank" value="">' +
-			'<input type="hidden" data-property="image_title" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][image_title]" id="widget-' + mediaWidgetType + '-' + id + '-image_title" value="">' +
-			'<input type="hidden" data-property="attachment_id" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][attachment_id]" id="widget-' + mediaWidgetType + '-' + id + '-attachment_id" value="0">' +
-			'<input type="hidden" data-property="url" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][url]" id="widget-' + mediaWidgetType + '-' + id + '-url" value="">' +
-			'<input type="hidden" data-property="title" class="media-widget-instance-property" name="widget-' + mediaWidgetType + '[' + id + '][title]" id="widget-' + mediaWidgetType + '-' + id + '-title" value="">';
+		// Only apply the following code if this is a media widget
+		if ( widget.querySelector( '.media-widget-control' ) != null ) {
+
+			// Enable selection of media for widget
+			widget.querySelector( '.select-media' ).addEventListener( 'click', function( e ) {
+				if ( e.target.className.includes( 'change-media' ) ) {
+					changeMedia = true;
+				}
+				focusID = e.target.closest( 'li' ).id;
+				widgetType = e.target.parentNode.previousElementSibling.className.replace( 'media-widget-preview ', '' );
+				updateGrid();
+				dialog.showModal();
+			} );
 		}
 	} );
 
@@ -479,10 +463,15 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		clearTimeout( searchtimer );
 		searchtimer = setTimeout( updateGrid, 200 );
 	} );
+
+	// Open modal to select item(s) to add to widget
 	document.querySelectorAll( '.widgets-sortables .select-media' ).forEach( function( addMedia ) {
 		addMedia.addEventListener( 'click', function( e ) {
+			if ( addMedia.className.includes( 'change-media' ) ) {
+				changeMedia = true;
+			}
 			focusID = e.target.closest( 'li' ).id;
-			widgetType = e.target.parentNode.parentNode.className.replace( 'media-widget-preview ', '' );
+			widgetType = e.target.parentNode.previousElementSibling.className.replace( 'media-widget-preview ', '' );
 			updateGrid();
 			dialog.showModal();
 		} );
@@ -491,6 +480,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	// Set functions for Escape and Enter keys
 	document.addEventListener( 'keyup', function( e ) {
 		if ( e.key === 'Escape' ) {
+			changeMedia = false;
 			document.getElementById( focusID ).querySelector( 'details' ).open = true;
 			document.getElementById( focusID ).querySelector( '.select-media' ).focus();
 		} else if ( e.key === 'Enter' && e.target.className === 'media-item' ) {
@@ -508,36 +498,63 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	/* Add item(s) to widget */
 	addButton.addEventListener( 'click', function() {
 		document.querySelectorAll( '.media-item.selected' ).forEach( function( selectedItem ) {
-			var widgetItem;
+			var imageItem,
+				widget = document.getElementById( focusID ),
+				modalSidebar = dialog.querySelector( '.media-sidebar' );
+
+			if ( changeMedia === true ) {
+				widget.querySelectorAll( 'img' ).forEach( function( image ) {
+					image.remove();
+				} );
+			} else {				
+				widget.querySelector( '.media-widget-preview' ).classList.add( widgetType );
+				widget.querySelector( '.media-widget-preview' ).classList.add( 'populated' );
+			}
 
 			if ( widgetType === 'media_audio' ) {
-				widgetItem = '';
+				imageItem = '';
 			} else if ( widgetType === 'media_video' ) {
-				widgetItem = '';
+				imageItem = '';
 			} else {
-				widgetItem = selectedItem.querySelector( 'img' );
-				widgetItem.className = 'attachment-thumb';
+				imageItem = selectedItem.querySelector( 'img' );
+				imageItem.className = 'attachment-thumb';
 			}
 
-			if ( document.getElementById( focusID ).querySelector( '.attachment-media-view' ) != null ) {
-				document.getElementById( focusID ).querySelector( '.attachment-media-view' ).remove();
+			if ( widget.querySelector( '.attachment-media-view' ) != null ) {
+				widget.querySelector( '.attachment-media-view' ).remove();
 			}
 
-			document.getElementById( focusID ).querySelector( '.media-widget-preview' ).classList.add( widgetType );
-			document.getElementById( focusID ).querySelector( '.media-widget-preview' ).classList.add( 'populated' );
-			document.getElementById( focusID ).querySelector( '.media-widget-preview' ).append( widgetItem );
-			document.getElementById( focusID ).querySelector( '.media-widget-buttons' ).style.display = '';
-			document.getElementById( focusID ).dispatchEvent( new Event( 'change' ) );
+			// Add values to widget-content fields
+			if ( widgetType === 'media_image' || widgetType === 'media_gallery' ) {
+				widget.querySelector( '.media-widget-preview' ).append( imageItem );
+				widget.querySelector( 'input[data-property="image_id"]' ).value = selectedItem.id.replace( 'media-', '' );
+				widget.querySelector( 'input[data-property="size"]' ).value = modalSidebar.querySelector( '.size' ).value;
+				widget.querySelector( 'input[data-property="link_type"]' ).value = modalSidebar.querySelector( '.link-to' ).value;
+				widget.querySelector( 'input[data-property="link_url"]' ).value = modalSidebar.querySelector( '.link-to-custom' ).value;
+				widget.querySelector( 'input[data-property="caption"]' ).value = modalSidebar.querySelector( '#attachment-details-two-column-caption' ).textContent;
+				widget.querySelector( 'input[data-property="alt_text"]' ).value = modalSidebar.querySelector( '#attachment-details-two-column-alt-text' ).textContent;
+			}
+
+			widget.dispatchEvent( new Event( 'change' ) );
 		} );
 		closeButton.click();
 	} );
 
 	/* Close modal by clicking button */
 	closeButton.addEventListener( 'click', function() {
+		var selectMedia = document.getElementById( focusID ).querySelector( '.select-media' );
+
+		changeMedia = false;
+
 		dialog.classList.remove( 'modal-loading' );
 		dialog.close();
+
 		if ( focusID != null ) { // set focus correctly
-			document.getElementById( focusID ).querySelector( '.select-media' ).focus();
+			if ( selectMedia != null ) {
+				selectMedia.focus();
+			} else {
+				document.getElementById( focusID ).querySelector( '.widget-control-save' ).focus();
+			}
 			focusID = null; // reset focusID
 		}
 		removeImageEditWrap();

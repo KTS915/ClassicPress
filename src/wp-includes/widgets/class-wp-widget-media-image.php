@@ -4,6 +4,7 @@
  *
  * @package ClassicPress
  * @subpackage Widgets
+ *
  * @since CP-2.3.0
  */
 
@@ -48,9 +49,9 @@ class WP_Widget_Media_Image extends WP_Widget {
 	public function widget( $args, $instance ) {
 		echo $args['before_widget'];
 
-		$title	 = ! empty( $instance['title'] ) ? apply_filters( 'widget_title', $instance['title'] ) : '';
+		$title     = ! empty( $instance['title'] ) ? apply_filters( 'widget_title', $instance['title'] ) : '';
 		$image_id  = ! empty( $instance['image_id'] ) ? $instance['image_id'] : 0;
-		$size	  = ! empty( $instance['size'] ) ? $instance['size'] : 'full';
+		$size      = ! empty( $instance['size'] ) ? $instance['size'] : 'full';
 		$link_type = ! empty( $instance['link_type'] ) ? $instance['link_type'] : '';
 		$link_url  = ! empty( $instance['link_url'] ) ? $instance['link_url'] : '';
 		$caption   = ! empty( $instance['caption'] ) ? $instance['caption'] : '';
@@ -90,9 +91,9 @@ class WP_Widget_Media_Image extends WP_Widget {
 	 * @param array $instance Previously saved values from database.
 	 */
 	public function form( $instance ) {
-		$title	 = ! empty( $instance['title'] ) ? $instance['title'] : '';
+		$title     = ! empty( $instance['title'] ) ? $instance['title'] : '';
 		$image_id  = ! empty( $instance['image_id'] ) ? $instance['image_id'] : 0;
-		$size	  = ! empty( $instance['size'] ) ? $instance['size'] : 'full';
+		$size      = ! empty( $instance['size'] ) ? $instance['size'] : 'full';
 		$link_type = ! empty( $instance['link_type'] ) ? $instance['link_type'] : '';
 		$link_url  = ! empty( $instance['link_url'] ) ? $instance['link_url'] : '';
 		$caption   = ! empty( $instance['caption'] ) ? $instance['caption'] : '';
@@ -167,9 +168,9 @@ class WP_Widget_Media_Image extends WP_Widget {
 	 */
 	public function update( $new_instance, $old_instance ) {
 		$instance = array();
-		$instance['title']	 = ( ! empty( $new_instance['title'] ) ) ? sanitize_text_field( $new_instance['title'] ) : '';
+		$instance['title']     = ( ! empty( $new_instance['title'] ) ) ? sanitize_text_field( $new_instance['title'] ) : '';
 		$instance['image_id']  = ( ! empty( $new_instance['image_id'] ) ) ? absint( $new_instance['image_id'] ) : 0;
-		$instance['size']	  = ( ! empty( $new_instance['size'] ) ) ? sanitize_text_field( $new_instance['size'] ) : 'full';
+		$instance['size']      = ( ! empty( $new_instance['size'] ) ) ? sanitize_text_field( $new_instance['size'] ) : 'full';
 		$instance['link_type'] = ( ! empty( $new_instance['link_type'] ) ) ? sanitize_text_field( $new_instance['link_type'] ) : '';
 		$instance['link_url']  = ( ! empty( $new_instance['link_url'] ) ) ? sanitize_url( $new_instance['link_url'] ) : '';
 		$instance['caption']   = ( ! empty( $new_instance['caption'] ) ) ? wp_kses_post( $new_instance['caption'] ) : '';

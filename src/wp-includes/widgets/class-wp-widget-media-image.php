@@ -112,7 +112,8 @@ class WP_Widget_Media_Image extends WP_Widget {
 
 					<?php
 					if ( $image_id ) {
-						echo wp_get_attachment_image( $image_id, 'medium' );
+						$raw_image = wp_get_attachment_image( $image_id, 'thumbnail' );
+						echo preg_replace( '~(height|width)="\d*"\s~', '', $raw_image );
 					}
 					?>
 

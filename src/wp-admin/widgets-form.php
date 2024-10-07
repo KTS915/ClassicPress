@@ -841,9 +841,8 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 											);
 
 											foreach ( $sizes as $value => $name ) {
-												// Don't use random sizes that have not been explicitly registered
-												$exploded = explode( 'x', $value );
-												if ( is_numeric( $exploded[0] ) ) {
+												// Don't use sizes intended only for core
+												if ( in_array( $value, array( '1536x1536', '2048x2048' ), true ) ) {
 													continue;
 												}
 												?>

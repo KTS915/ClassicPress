@@ -49,25 +49,25 @@ class WP_Widget_Media_Image extends WP_Widget {
 	public function widget( $args, $instance ) {
 		echo $args['before_widget'];
 
-		$title     = ! empty( $instance['title'] ) ? apply_filters( 'widget_title', $instance['title'] ) : '';
-		$image_id  = ! empty( $instance['image_id'] ) ? $instance['image_id'] : 0;
-		$size      = ! empty( $instance['size'] ) ? $instance['size'] : 'full';
-		$link_type = ! empty( $instance['link_type'] ) ? $instance['link_type'] : '';
-		$link_url  = ! empty( $instance['link_url'] ) ? $instance['link_url'] : '';
-		$caption   = ! empty( $instance['caption'] ) ? $instance['caption'] : '';
-		$alt_text  = ! empty( $instance['alt_text'] ) ? $instance['alt_text'] : '';
+		$title         = ! empty( $instance['title'] ) ? apply_filters( 'widget_title', $instance['title'] ) : '';
+		$attachment_id = ! empty( $instance['attachment_id'] ) ? $instance['attachment_id'] : 0;
+		$size          = ! empty( $instance['size'] ) ? $instance['size'] : 'full';
+		$link_type     = ! empty( $instance['link_type'] ) ? $instance['link_type'] : '';
+		$link_url      = ! empty( $instance['link_url'] ) ? $instance['link_url'] : '';
+		$caption       = ! empty( $instance['caption'] ) ? $instance['caption'] : '';
+		$alt_text      = ! empty( $instance['alt_text'] ) ? $instance['alt_text'] : '';
 
 		if ( ! empty( $title ) ) {
 			echo $args['before_title'] . $title . $args['after_title'];
 		}
 
-		if ( $image_id ) {
-			$image_html = wp_get_attachment_image( $image_id, $size, false, array( 'alt' => $alt_text ) );
+		if ( $attachment_id ) {
+			$image_html = wp_get_attachment_image( $attachment_id, $size, false, array( 'alt' => $alt_text ) );
 			
 			if ( $link_type === 'custom' && ! empty( $link_url ) ) {
 				$image_html = '<a href="' . esc_url( $link_url ) . '">' . $image_html . '</a>';
 			} elseif ( $link_type === 'file' ) {
-				$file_url = wp_get_attachment_url( $image_id );
+				$file_url = wp_get_attachment_url( $attachment_id );
 				$image_html = '<a href="' . esc_url( $file_url ) . '">' . $image_html . '</a>';
 			}
 
@@ -91,13 +91,13 @@ class WP_Widget_Media_Image extends WP_Widget {
 	 * @param array $instance Previously saved values from database.
 	 */
 	public function form( $instance ) {
-		$title     = ! empty( $instance['title'] ) ? $instance['title'] : '';
-		$image_id  = ! empty( $instance['image_id'] ) ? $instance['image_id'] : 0;
-		$size      = ! empty( $instance['size'] ) ? $instance['size'] : 'full';
-		$link_type = ! empty( $instance['link_type'] ) ? $instance['link_type'] : '';
-		$link_url  = ! empty( $instance['link_url'] ) ? $instance['link_url'] : '';
-		$caption   = ! empty( $instance['caption'] ) ? $instance['caption'] : '';
-		$alt_text  = ! empty( $instance['alt_text'] ) ? $instance['alt_text'] : '';
+		$title         = ! empty( $instance['title'] ) ? $instance['title'] : '';
+		$attachment_id = ! empty( $instance['attachment_id'] ) ? $instance['attachment_id'] : 0;
+		$size          = ! empty( $instance['size'] ) ? $instance['size'] : 'full';
+		$link_type     = ! empty( $instance['link_type'] ) ? $instance['link_type'] : '';
+		$link_url      = ! empty( $instance['link_url'] ) ? $instance['link_url'] : '';
+		$caption       = ! empty( $instance['caption'] ) ? $instance['caption'] : '';
+		$alt_text      = ! empty( $instance['alt_text'] ) ? $instance['alt_text'] : '';
 		?>
 
 		<div class="media-widget-control">
@@ -110,8 +110,8 @@ class WP_Widget_Media_Image extends WP_Widget {
 				<div class="media-widget-preview media_image">
 
 					<?php
-					if ( $image_id ) {
-						$raw_image = wp_get_attachment_image( $image_id, 'thumbnail' );
+					if ( $attachment_id ) {
+						$raw_image = wp_get_attachment_image( $attachment_id, 'thumbnail' );
 						echo preg_replace( '~(height|width)="\d*"\s~', '', $raw_image );
 					}
 					?>
@@ -119,7 +119,7 @@ class WP_Widget_Media_Image extends WP_Widget {
 				</div>
 						
 				<?php
-				if ( $image_id ) {
+				if ( $attachment_id ) {
 				?>
 
 					<div class="media-widget-buttons">
@@ -142,7 +142,7 @@ class WP_Widget_Media_Image extends WP_Widget {
 			</fieldset>
 
 			<div> 
-				<input class="widefat" id="<?php echo $this->get_field_id( 'image_id' ); ?>" name="<?php echo $this->get_field_name( 'image_id' ); ?>" type="hidden" data-property="image_id" value="<?php echo esc_attr( $image_id ); ?>">
+				<input class="widefat" id="<?php echo $this->get_field_id( 'attachment_id' ); ?>" name="<?php echo $this->get_field_name( 'attachment_id' ); ?>" type="hidden" data-property="attachment_id" value="<?php echo esc_attr( $attachment_id ); ?>">
 				<input class="widefat" id="<?php echo $this->get_field_id('size'); ?>" name="<?php echo $this->get_field_name( 'size' ); ?>" type="hidden" data-property="size" value="<?php echo esc_attr( $size ); ?>">
 				<input class="widefat" id="<?php echo $this->get_field_id( 'link_type' ); ?>" name="<?php echo $this->get_field_name( 'link_type' ); ?>" type="hidden" data-property="link_type" value="<?php echo esc_attr( $link_type ); ?>">
 				<input class="widefat" id="<?php echo $this->get_field_id( 'link_url' ); ?>" name="<?php echo $this->get_field_name( 'link_url' ); ?>" type="hidden" data-property="link_url" value="<?php echo esc_attr( $link_url ); ?>">
@@ -168,13 +168,13 @@ class WP_Widget_Media_Image extends WP_Widget {
 	 */
 	public function update( $new_instance, $old_instance ) {
 		$instance = array();
-		$instance['title']     = ( ! empty( $new_instance['title'] ) ) ? sanitize_text_field( $new_instance['title'] ) : '';
-		$instance['image_id']  = ( ! empty( $new_instance['image_id'] ) ) ? absint( $new_instance['image_id'] ) : 0;
-		$instance['size']      = ( ! empty( $new_instance['size'] ) ) ? sanitize_text_field( $new_instance['size'] ) : 'full';
-		$instance['link_type'] = ( ! empty( $new_instance['link_type'] ) ) ? sanitize_text_field( $new_instance['link_type'] ) : '';
-		$instance['link_url']  = ( ! empty( $new_instance['link_url'] ) ) ? sanitize_url( $new_instance['link_url'] ) : '';
-		$instance['caption']   = ( ! empty( $new_instance['caption'] ) ) ? wp_kses_post( $new_instance['caption'] ) : '';
-		$instance['alt_text']  = ( ! empty( $new_instance['alt_text'] ) ) ? sanitize_text_field( $new_instance['alt_text'] ) : '';
+		$instance['title']         = ! empty( $new_instance['title'] ) ? sanitize_text_field( $new_instance['title'] ) : '';
+		$instance['attachment_id'] = ! empty( $new_instance['attachment_id'] ) ? absint( $new_instance['attachment_id'] ) : 0;
+		$instance['size']          = ! empty( $new_instance['size'] ) ? sanitize_text_field( $new_instance['size'] ) : 'full';
+		$instance['link_type']     = ! empty( $new_instance['link_type'] ) ? sanitize_text_field( $new_instance['link_type'] ) : '';
+		$instance['link_url']      = ! empty( $new_instance['link_url'] ) ? sanitize_url( $new_instance['link_url'] ) : '';
+		$instance['caption']       = ! empty( $new_instance['caption'] ) ? wp_kses_post( $new_instance['caption'] ) : '';
+		$instance['alt_text']      = ! empty( $new_instance['alt_text'] ) ? sanitize_text_field( $new_instance['alt_text'] ) : '';
 
 		return $instance;
 	}

@@ -125,7 +125,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			removeButton.disabled = true;
 		}
 
-		else {
+		else if ( e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' ) {
 
 			// Add chooser
 			if ( e.target.closest( 'ul' ).id === 'widget-list' ) {

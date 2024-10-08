@@ -1246,7 +1246,7 @@ function wp_default_scripts( $scripts ) {
 		did_action( 'init' ) && $scripts->localize(
 			'media-widgets',
 			'_wpMediaGridSettings',
-			array( /* These are just placeholders copied from elsewhere and need revisiting */
+			array(
 				'by'               => __( 'by' ),
 				'pixels'           => __( 'pixels' ),
 				'deselect'         => __( 'Deselect' ),
@@ -1260,6 +1260,7 @@ function wp_default_scripts( $scripts ) {
 				'delete_failed'    => __( 'Failed to delete attachment.' ),
 				'confirm_delete'   => __( "You are about to permanently delete this item from your site.\nThis action cannot be undone.\n'Cancel' to stop, 'OK' to delete." ),
 				'confirm_multiple' => __( "You are about to permanently delete these items from your site.\nThis action cannot be undone.\n'Cancel' to stop, 'OK' to delete." ),
+				'includes_url'     => includes_url(),
 			)
 		);
 

@@ -1208,6 +1208,9 @@ dialog::backdrop {
     outline-style: solid;
     outline-width: 0.125rem;
 }
+.media-widget-control .mejs-mediaelement {
+	position: static;
+}
 
 /* =Media Queries
 -------------------------------------------------------------- */

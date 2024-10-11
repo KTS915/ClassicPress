@@ -465,16 +465,16 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	} );
 
 	// Open modal to select item(s) to add to widget
-	document.querySelectorAll( '.widgets-sortables .select-media' ).forEach( function( addMedia ) {
-		addMedia.addEventListener( 'click', function( e ) {
-			if ( addMedia.className.includes( 'change-media' ) ) {
+	document.addEventListener( 'click', function( e ) {
+		if ( e.target.className.includes( 'select-media' ) && e.target.parentNode.className === 'media-widget-buttons' ) {
+			if ( e.target.className.includes( 'change-media' ) ) {
 				changeMedia = true;
 			}
 			focusID = e.target.closest( 'li' ).id;
 			widgetType = e.target.parentNode.previousElementSibling.className.replace( 'media-widget-preview ', '' );
 			updateGrid();
 			dialog.showModal();
-		} );
+		}
 	} );
 
 	// Set functions for Escape and Enter keys

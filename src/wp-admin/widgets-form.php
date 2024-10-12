@@ -78,10 +78,6 @@ if ( ! $max_upload_size ) {
 	$max_upload_size = 0;
 }
 
-// Get a list of allowed mime types.
-$allowed_mimes = get_allowed_mime_types();
-$mimes_list = implode( ',', $allowed_mimes );
-
 // Get the user's preferred items per page.
 $user = get_current_user_id();
 $per_page = get_user_meta( $user, 'media_grid_per_page', true );
@@ -574,8 +570,8 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 <div class="widgets-chooser">
 	<ul class="widgets-chooser-sidebars"></ul>
 	<div class="widgets-chooser-actions">
-		<button class="button widgets-chooser-cancel"><?php _e( 'Cancel' ); ?></button>
-		<button class="button button-primary widgets-chooser-add"><?php _e( 'Add Widget' ); ?></button>
+		<button class="button widgets-chooser-cancel"><?php esc_html_e( 'Cancel' ); ?></button>
+		<button class="button button-primary widgets-chooser-add"><?php esc_html_e( 'Add Widget' ); ?></button>
 	</div>
 </div>
 
@@ -583,39 +579,57 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 	<div tabindex="0" class="media-modal wp-core-ui" aria-labelledby="media-frame-title">
 		<button type="button" id="media-modal-close" class="media-modal-close" autofocus>
 			<span class="media-modal-icon">
-				<span class="screen-reader-text">Close dialog</span>
+				<span class="screen-reader-text"><?php esc_html_e( 'Close dialog' ); ?></span>
 			</span>
 		</button>
 			
-		<div class="media-modal-content" role="document">
+		<div class="media-modal-content">
 			<div class="media-frame mode-select wp-core-ui media-widget" id="__wp-uploader-id-0">
 				<div class="media-frame-title" id="media-frame-title">
-					<h1>Add Image</h1>
+					<h2><?php esc_html_e( 'Add Image' ); ?></h2>
 				</div>
-				<h2 class="media-frame-menu-heading">Actions</h2>
-				<button type="button" class="button button-link media-frame-menu-toggle" aria-expanded="false">Menu<span class="dashicons dashicons-arrow-down" aria-hidden="true"></span></button>
+				<h3 class="media-frame-menu-heading"><?php esc_html_e( 'Actions' ); ?></h3>
+				<button type="button" class="button button-link media-frame-menu-toggle" aria-expanded="false"><?php esc_html_e( 'Menu' ); ?><span class="dashicons dashicons-arrow-down" aria-hidden="true"></span></button>
 
 				<div class="media-frame-menu">
 					<div role="tablist" aria-orientation="vertical" class="media-menu">
-						<button type="button" role="tab" class="media-menu-item active" id="menu-item-insert" aria-selected="true">Add Image</button>
+						<button type="button" role="tab" class="media-menu-item active" id="menu-item-insert" aria-selected="true"><?php esc_html_e( 'Add Image' ); ?></button>
 						<div role="presentation" class="separator"></div>
-						<button type="button" role="tab" class="media-menu-item" id="menu-item-embed" aria-selected="false" tabindex="-1">Insert from URL</button>
+						<button type="button" role="tab" class="media-menu-item" id="menu-item-embed" aria-selected="false" tabindex="-1"><?php esc_html_e( 'Insert from URL' ); ?></button>
 					</div>
 				</div>
 
 				<div class="media-frame-tab-panel" role="tabpanel" aria-labelledby="menu-item-insert" tabindex="0">
 					<div class="media-frame-router">
 						<div role="tablist" aria-orientation="horizontal" class="media-router">
-							<button type="button" role="tab" class="media-menu-item" id="menu-item-upload" aria-selected="false" tabindex="-1">Upload files</button>
-							<button type="button" role="tab" class="media-menu-item active" id="menu-item-browse" aria-selected="true">Media Library</button>
+							<button type="button" role="tab" class="media-menu-item" id="menu-item-upload" aria-selected="false" tabindex="-1"><?php esc_html_e( 'Upload files' ); ?></button>
+							<button type="button" role="tab" class="media-menu-item active" id="menu-item-browse" aria-selected="true"><?php esc_html_e( 'Media Library' ); ?></button>
 						</div>
 					</div>
 
 					<div class="media-frame-content" role="tabpanel" aria-labelledby="menu-item-browse" tabindex="0" data-columns="9">
+
+						<div class="uploader-inline" data-allowed-mimes="" hidden inert>
+							<input type="file" id="filepond" class="filepond" name="filepond" multiple data-allow-reorder="true" data-max-file-size="<?php echo esc_attr( size_format( $max_upload_size ) ); ?>">
+							<input id="ajax-url" value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>" hidden>
+							<?php wp_nonce_field( 'media-form' ); ?>
+
+							<div class="post-upload-ui" id="post-upload-info">
+								<p class="max-upload-size">
+
+									<?php
+									/* translators: %s: Maximum allowed file size. */
+									printf( __( 'Maximum upload file size: %s.' ), esc_html( size_format( $max_upload_size ) ) );
+									?>
+
+								</p>
+							</div>
+						</div>
+
 						<div class="attachments-browser has-load-more">
 							<div class="media-toolbar">
 								<div class="media-toolbar-secondary">
-									<h2 class="media-attachments-filter-heading">Filter media</h2>
+									<h3 class="media-attachments-filter-heading"><?php esc_html_e( 'Filter media' ); ?></h3>
 									<div style="margin-top: 3em">
 
 										<?php
@@ -629,12 +643,12 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 								</div>
 
 								<div class="media-toolbar-primary search-form">
-									<label for="media-search-input" class="media-search-input-label">Search</label>
+									<label for="media-search-input" class="media-search-input-label"><?php esc_html_e( 'Search' ); ?></label>
 									<input type="search" id="media-search-input" class="search">
 								</div>
 
 								<div class="media-toolbar-tertiary">
-									<h2 class="screen-reader-text"><?php esc_html_e( 'Media items navigation' ); ?></h2>
+									<h3 class="screen-reader-text"><?php esc_html_e( 'Media items navigation' ); ?></h3>
 									<div class="tablenav-pages">
 										<span class="displaying-num">
 						
@@ -692,7 +706,7 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 							</div>
 						</div>
 							
-						<h2 class="media-views-heading screen-reader-text">Media list</h2>
+						<h3 class="media-views-heading screen-reader-text"><?php esc_html_e( 'Media list' ); ?></h3>
 						<div class="attachments-wrapper">
 							<div id="media-grid">
 								<ul class="media-grid-view">
@@ -802,7 +816,7 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 								</div>
 
 								<div class="attachment-display-settings">
-									<h2><?php esc_html_e( 'Attachment Display Settings' ); ?></h2>
+									<h3><?php esc_html_e( 'Attachment Display Settings' ); ?></h3>
 
 									<span class="setting align">
 										<label for="attachment-display-settings-alignment" class="name"><?php esc_html_e( 'Alignment' ); ?></label>
@@ -861,7 +875,7 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 							</div>
 
 							<div class="media-uploader-status" style="display: none;">
-								<h2>Uploading</h2>
+								<h3><?php esc_html_e( 'Uploading' ); ?></h3>
 								<div class="media-progress-bar">
 									<div></div>
 								</div>
@@ -873,7 +887,7 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 									<span class="upload-filename"></span>
 								</div>
 								<div class="upload-errors"></div>
-								<button type="button" class="button upload-dismiss-errors">Dismiss errors</button>
+								<button type="button" class="button upload-dismiss-errors"><?php esc_html_e( 'Dismiss errors' ); ?></button>
 							</div>
 						</div>
 
@@ -881,34 +895,13 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 				</div>
 			</div>
 
-			<h2 class="media-frame-actions-heading screen-reader-text">Selected media actions</h2>
+			<h3 class="media-frame-actions-heading screen-reader-text"><?php esc_html_e( 'Selected media actions' ); ?></h3>
 			<div class="media-frame-toolbar">
 				<div class="media-toolbar">
 					<div class="media-toolbar-secondary"></div>
 					<div class="media-toolbar-primary search-form">
-						<button type="button" class="button media-button button-primary button-large media-button-insert" disabled>Add to Widget</button>
+						<button type="button" class="button media-button button-primary button-large media-button-insert" disabled><?php esc_html_e( 'Add to Widget' ); ?></button>
 					</div>
-				</div>
-			</div>
-			
-			<div class="uploader-inline" data-allowed-mimes="<?php echo esc_attr( $mimes_list ); ?>" hidden inert>
-				<button type="button" class="close dashicons dashicons-no">
-					<span class="screen-reader-text">Close uploader</span>
-				</button>
-
-				<input type="file" id="filepond" class="filepond" name="filepond" multiple data-allow-reorder="true" data-max-file-size="<?php echo esc_attr( size_format( $max_upload_size ) ); ?>">
-				<input id="ajax-url" value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>" hidden>
-				<?php wp_nonce_field( 'media-form' ); ?>
-
-				<div class="post-upload-ui" id="post-upload-info">
-					<p class="max-upload-size">
-
-						<?php
-						/* translators: %s: Maximum allowed file size. */
-						printf( __( 'Maximum upload file size: %s.' ), esc_html( size_format( $max_upload_size ) ) );
-						?>
-
-					</p>
 				</div>
 			</div>
 

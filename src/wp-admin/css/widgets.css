@@ -967,8 +967,15 @@ dialog {
 #post-upload-info {
 	margin-top: -6em;
 }
+#widget-modal #post-upload-info {
+	padding-bottom: 2.5em;
+}
 .filepond--drop-label {
 	background-color: #ecf7e9;
+}
+#widget-modal .filepond--drop-label.filepond--drop-label label {
+	font-size: 16px;
+	padding-top: 3em;
 }
 .filepond--credits {
 	display: none;

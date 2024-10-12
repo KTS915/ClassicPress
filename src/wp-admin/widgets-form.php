@@ -576,7 +576,7 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 </div>
 
 <dialog id="widget-modal">
-	<div tabindex="0" class="media-modal wp-core-ui" aria-labelledby="media-frame-title">
+	<div class="media-modal wp-core-ui" aria-labelledby="media-frame-title">
 		<button type="button" id="media-modal-close" class="media-modal-close" autofocus>
 			<span class="media-modal-icon">
 				<span class="screen-reader-text"><?php esc_html_e( 'Close dialog' ); ?></span>
@@ -584,8 +584,8 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 		</button>
 			
 		<div class="media-modal-content">
-			<div class="media-frame mode-select wp-core-ui media-widget" id="__wp-uploader-id-0">
-				<div class="media-frame-title" id="media-frame-title">
+			<div id="__wp-uploader-id-0" class="media-frame mode-select wp-core-ui media-widget">
+				<div id="media-frame-title" class="media-frame-title">
 					<h2><?php esc_html_e( 'Add Image' ); ?></h2>
 				</div>
 				<h3 class="media-frame-menu-heading"><?php esc_html_e( 'Actions' ); ?></h3>
@@ -593,23 +593,23 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 
 				<div class="media-frame-menu">
 					<div role="tablist" aria-orientation="vertical" class="media-menu">
-						<button type="button" role="tab" class="media-menu-item active" id="menu-item-insert" aria-selected="true"><?php esc_html_e( 'Add Image' ); ?></button>
+						<button id="menu-item-insert" type="button" role="tab" class="media-menu-item active" aria-selected="true" aria-controls="media-frame-tab-panel"><?php esc_html_e( 'Add Image' ); ?></button>
 						<div role="presentation" class="separator"></div>
-						<button type="button" role="tab" class="media-menu-item" id="menu-item-embed" aria-selected="false" tabindex="-1"><?php esc_html_e( 'Insert from URL' ); ?></button>
+						<button id="menu-item-embed" type="button" role="tab" class="media-menu-item" aria-selected="false" aria-controls="insert-from-url-panel"><?php esc_html_e( 'Insert from URL' ); ?></button>
 					</div>
 				</div>
 
-				<div class="media-frame-tab-panel" role="tabpanel" aria-labelledby="menu-item-insert" tabindex="0">
+				<div id="media-frame-tab-panel" class="media-frame-tab-panel" role="tabpanel" aria-labelledby="menu-item-insert">
 					<div class="media-frame-router">
 						<div role="tablist" aria-orientation="horizontal" class="media-router">
-							<button type="button" role="tab" class="media-menu-item" id="menu-item-upload" aria-selected="false" tabindex="-1"><?php esc_html_e( 'Upload files' ); ?></button>
-							<button type="button" role="tab" class="media-menu-item active" id="menu-item-browse" aria-selected="true"><?php esc_html_e( 'Media Library' ); ?></button>
+							<button type="button" role="tab" class="media-menu-item" id="menu-item-upload" aria-selected="false"aria-controls="uploader-inline"><?php esc_html_e( 'Upload files' ); ?></button>
+							<button type="button" role="tab" class="media-menu-item active" id="menu-item-browse" aria-selected="true" aria-controls="attachments-browser"><?php esc_html_e( 'Media Library' ); ?></button>
 						</div>
 					</div>
 
-					<div class="media-frame-content" role="tabpanel" aria-labelledby="menu-item-browse" tabindex="0" data-columns="9">
+					<div class="media-frame-content" role="tabpanel" aria-labelledby="menu-item-browse" data-columns="9">
 
-						<div class="uploader-inline" data-allowed-mimes="" hidden inert>
+						<div id="uploader-inline" class="uploader-inline" role="tabpanel" data-allowed-mimes="" hidden inert>
 							<input type="file" id="filepond" class="filepond" name="filepond" multiple data-allow-reorder="true" data-max-file-size="<?php echo esc_attr( size_format( $max_upload_size ) ); ?>">
 							<input id="ajax-url" value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>" hidden>
 							<?php wp_nonce_field( 'media-form' ); ?>
@@ -624,9 +624,9 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 
 								</p>
 							</div>
-						</div>
+						</div><!-- End of "uploader-inline" -->
 
-						<div class="attachments-browser has-load-more">
+						<div id="attachments-browser" class="attachments-browser has-load-more" role="tabpanel">
 							<div class="media-toolbar">
 								<div class="media-toolbar-secondary">
 									<h3 class="media-attachments-filter-heading"><?php esc_html_e( 'Filter media' ); ?></h3>
@@ -702,198 +702,264 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 											</a>
 										</span>
 									</div>
-								<br class="clear">
-							</div>
-						</div>
-							
-						<h3 class="media-views-heading screen-reader-text"><?php esc_html_e( 'Media list' ); ?></h3>
-						<div class="attachments-wrapper">
-							<div id="media-grid">
-								<ul class="media-grid-view">
-									<?php // populated by JS after call to fetch API ?>
-								</ul>
-								<div class="load-more-wrapper">
-									<p class="load-more-count">
-										<?php // populated, if applicable, by JS after call to fetch API ?>
-									</p>
-									<p class="no-media" hidden>
-										<?php // populated, if applicable, by JS after call to fetch API ?>
-									</p>
+									<br class="clear">
 								</div>
 							</div>
-						</div>
-
-						<div class="media-sidebar">
-							<div class="attachment-details save-ready">
-								<h3><?php esc_html_e( 'Attachment Details' ); ?></h3>
-								<div class="attachment-info">
-									<div class="details">
-										<div class="filename"><strong><span class="screen-reader-text"><?php esc_html_e( 'File name:' ); ?></span> <span class="attachment-filename"></span></strong></div>
-										<div class="uploaded">
-											<span class="screen-reader-text"><?php esc_html_e( 'Uploaded on:' ); ?></span> <span class="attachment-date">
-										</div>
-										<div class="file-size"><span class="screen-reader-text"><?php esc_html_e( 'File size:' ); ?></span> <span class="attachment-filesize"></div>
-										<div class="dimensions"><span class="screen-reader-text"><?php esc_html_e( 'Dimensions:' ); ?></span> <span class="attachment-dimensions"></div>
-									
-										<div>
-										<a id="edit-more" href=""><?php esc_html_e( 'Edit details' ); ?></a>
-										</div>
-										<div>
-											<button type="button" class="button-link delete-attachment"><?php esc_html_e( 'Delete permanently' ); ?></button>
-										</div>
-
-										<div class="compat-meta"></div>
+							
+							<h3 class="media-views-heading screen-reader-text"><?php esc_html_e( 'Media list' ); ?></h3>
+							<div class="attachments-wrapper">
+								<div id="media-grid">
+									<ul class="media-grid-view">
+										<?php // populated by JS after call to fetch API ?>
+									</ul>
+									<div class="load-more-wrapper">
+										<p class="load-more-count">
+											<?php // populated, if applicable, by JS after call to fetch API ?>
+										</p>
+										<p class="no-media" hidden>
+											<?php // populated, if applicable, by JS after call to fetch API ?>
+										</p>
 									</div>
 								</div>
+							</div>
 
-								<?php
-								/**
-								 * This action is fired after the details list
-								 * within the dialog modal is printed to the page.
-								 *
-								 * @since CP-2.3.0
-								 */
-								do_action( 'cp_media_modal_after_details' );
-								?>
+							<div class="media-sidebar">
+								<div class="attachment-details save-ready">
+									<h3><?php esc_html_e( 'Attachment Details' ); ?></h3>
+									<div class="attachment-info">
+										<div class="details">
+											<div class="filename"><strong><span class="screen-reader-text"><?php esc_html_e( 'File name:' ); ?></span> <span class="attachment-filename"></span></strong></div>
+											<div class="uploaded">
+												<span class="screen-reader-text"><?php esc_html_e( 'Uploaded on:' ); ?></span> <span class="attachment-date">
+											</div>
+											<div class="file-size">
+												<span class="screen-reader-text"><?php esc_html_e( 'File size:' ); ?></span> <span class="attachment-filesize">
+											</div>
+											<div class="dimensions">
+												<span class="screen-reader-text"><?php esc_html_e( 'Dimensions:' ); ?></span> <span class="attachment-dimensions">
+											</div>
+											<div>
+												<a id="edit-more" href=""><?php esc_html_e( 'Edit details' ); ?></a>
+											</div>
+											<div>
+												<button type="button" class="button-link delete-attachment"><?php esc_html_e( 'Delete permanently' ); ?></button>
+											</div>
 
-								<div class="settings">
-									<span class="setting alt-text has-description" data-setting="alt">
-										<label for="attachment-details-two-column-alt-text" class="name"><?php esc_html_e( 'Alt Text' ); ?></label>
-										<textarea id="attachment-details-two-column-alt-text" aria-describedby="alt-text-description"></textarea>
-									</span>
-									<p class="description" id="alt-text-description"><a href="https://www.w3.org/WAI/tutorials/images/decision-tree" target="_blank" rel="noopener"><?php esc_html_e( 'Learn how to describe the purpose of the image' ); ?><span class="screen-reader-text"> <?php esc_html_e( '(opens in a new tab)' ); ?></span></a><?php esc_html_e( '. Leave empty if the image is purely decorative.' ); ?></p>
-									<span class="setting" data-setting="title">
-										<label for="attachment-details-two-column-title" class="name"><?php esc_html_e( 'Title' ); ?></label>
-										<input type="text" id="attachment-details-two-column-title" value="">
-									</span>
-									<span class="setting settings-save-status" role="status">
-										<span id="details-saved" class="success hidden" aria-hidden="true"><?php esc_html_e( 'Saved!' ); ?></span>
-									</span>
-									<span class="setting" data-setting="caption">
-										<label for="attachment-details-two-column-caption" class="name"><?php esc_html_e( 'Caption' ); ?></label>
-										<textarea id="attachment-details-two-column-caption"></textarea>
-									</span>
-									<span class="setting" data-setting="description">
-										<label for="attachment-details-two-column-description" class="name"><?php esc_html_e( 'Description' ); ?></label>
-										<textarea id="attachment-details-two-column-description"></textarea>
-									</span>
-									<span class="setting" data-setting="url">
-										<label for="attachment-details-two-column-copy-link" class="name"><?php esc_html_e( 'File URL' ); ?></label>
-										<input type="text" class="attachment-details-copy-link" id="attachment-details-two-column-copy-link" value="" readonly="">
-										<span class="copy-to-clipboard-container">
-											<button type="button" class="button button-small copy-attachment-url media-library" data-clipboard-target="#attachment-details-two-column-copy-link"><?php esc_html_e( 'Copy URL to clipboard' ); ?></button>
-											<span class="success hidden" aria-hidden="true"><?php esc_html_e( 'Copied!' ); ?></span>
+											<div class="compat-meta"></div>
+										</div>
+									</div>
+
+									<?php
+									/**
+									 * This action is fired after the details list
+									 * within the dialog modal is printed to the page.
+									 *
+									 * @since CP-2.3.0
+									 */
+									do_action( 'cp_media_modal_after_details' );
+									?>
+
+									<div class="settings">
+										<span class="setting alt-text has-description" data-setting="alt">
+											<label for="attachment-details-two-column-alt-text" class="name"><?php esc_html_e( 'Alt Text' ); ?></label>
+											<textarea id="attachment-details-two-column-alt-text" aria-describedby="alt-text-description"></textarea>
 										</span>
-									</span>
+										<p class="description" id="alt-text-description"><a href="https://www.w3.org/WAI/tutorials/images/decision-tree" target="_blank" rel="noopener"><?php esc_html_e( 'Learn how to describe the purpose of the image' ); ?><span class="screen-reader-text"> <?php esc_html_e( '(opens in a new tab)' ); ?></span></a><?php esc_html_e( '. Leave empty if the image is purely decorative.' ); ?></p>
+										<span class="setting" data-setting="title">
+											<label for="attachment-details-two-column-title" class="name"><?php esc_html_e( 'Title' ); ?></label>
+											<input type="text" id="attachment-details-two-column-title" value="">
+										</span>
+										<span class="setting settings-save-status" role="status">
+											<span id="details-saved" class="success hidden" aria-hidden="true"><?php esc_html_e( 'Saved!' ); ?></span>
+										</span>
+										<span class="setting" data-setting="caption">
+											<label for="attachment-details-two-column-caption" class="name"><?php esc_html_e( 'Caption' ); ?></label>
+											<textarea id="attachment-details-two-column-caption"></textarea>
+										</span>
+										<span class="setting" data-setting="description">
+											<label for="attachment-details-two-column-description" class="name"><?php esc_html_e( 'Description' ); ?></label>
+											<textarea id="attachment-details-two-column-description"></textarea>
+										</span>
+										<span class="setting" data-setting="url">
+											<label for="attachment-details-two-column-copy-link" class="name"><?php esc_html_e( 'File URL' ); ?></label>
+											<input type="text" class="attachment-details-copy-link" id="attachment-details-two-column-copy-link" value="" readonly="">
+											<span class="copy-to-clipboard-container">
+												<button type="button" class="button button-small copy-attachment-url media-library" data-clipboard-target="#attachment-details-two-column-copy-link"><?php esc_html_e( 'Copy URL to clipboard' ); ?></button>
+												<span class="success hidden" aria-hidden="true"><?php esc_html_e( 'Copied!' ); ?></span>
+											</span>
+										</span>
 
-									<?php
-									/**
-									 * This action is fired before the inputs
-									 * and textareas within the dialog modal
-									 * are printed to the page.
-									 *
-									 * @since CP-2.3.0
-									 */
-									do_action( 'cp_media_modal_before_media_menu_order' );
-									?>
+										<?php
+										/**
+										 * This action is fired before the inputs
+										 * and textareas within the dialog modal
+										 * are printed to the page.
+										 *
+										 * @since CP-2.3.0
+										 */
+										do_action( 'cp_media_modal_before_media_menu_order' );
+										?>
 
-									<div class="attachment-compat"></div>
-									<span class="setting settings-save-status" role="status">
-										<span id="tax-saved" class="success hidden" aria-hidden="true"><?php esc_html_e( 'Taxonomy updated successfully!' ); ?></span>
-									</span>
+										<div class="attachment-compat"></div>
+										<span class="setting settings-save-status" role="status">
+											<span id="tax-saved" class="success hidden" aria-hidden="true"><?php esc_html_e( 'Taxonomy updated successfully!' ); ?></span>
+										</span>
 
-									<?php
-									/**
-									 * This action is fired after the post tags
-									 * list within the dialog modal is printed
-									 * to the page.
-									 *
-									 * @since CP-2.3.0
-									 */
-									do_action( 'cp_media_modal_after_media_post_tags' );
-									?>
+										<?php
+										/**
+										 * This action is fired after the post tags
+										 * list within the dialog modal is printed
+										 * to the page.
+										 *
+										 * @since CP-2.3.0
+										 */
+										do_action( 'cp_media_modal_after_media_post_tags' );
+										?>
 
-								</div>
+									</div>
 
-								<div class="attachment-display-settings">
-									<h3><?php esc_html_e( 'Attachment Display Settings' ); ?></h3>
+									<div class="attachment-display-settings">
+										<h3><?php esc_html_e( 'Attachment Display Settings' ); ?></h3>
 
-									<span class="setting align">
-										<label for="attachment-display-settings-alignment" class="name"><?php esc_html_e( 'Alignment' ); ?></label>
-										<select id="attachment-display-settings-alignment" class="alignment" data-setting="align">
-											<option value="left"><?php esc_html_e( 'Left' ); ?></option>
-											<option value="center"><?php esc_html_e( 'Center' ); ?></option>
-											<option value="right"><?php esc_html_e( 'Right' ); ?></option>
-											<option value="none" selected=""><?php esc_html_e( 'None' ); ?></option>
-										</select>
-									</span>
+										<span class="setting align">
+											<label for="attachment-display-settings-alignment" class="name"><?php esc_html_e( 'Alignment' ); ?></label>
+											<select id="attachment-display-settings-alignment" class="alignment" data-setting="align">
+												<option value="left"><?php esc_html_e( 'Left' ); ?></option>
+												<option value="center"><?php esc_html_e( 'Center' ); ?></option>
+												<option value="right"><?php esc_html_e( 'Right' ); ?></option>
+												<option value="none" selected=""><?php esc_html_e( 'None' ); ?></option>
+											</select>
+										</span>
 
-									<span class="setting">
-										<label for="attachment-display-settings-link-to" class="name"><?php esc_html_e( 'Link To' ); ?></label>
-										<select id="attachment-display-settings-link-to" class="link-to" data-setting="link">
-											<option value="none" selected=""><?php esc_html_e( 'None' ); ?></option>
-											<option value="file"><?php esc_html_e( 'Media File' ); ?></option>
-											<option value="post"><?php esc_html_e( 'Attachment Page' ); ?></option>
-											<option value="custom"><?php esc_html_e( 'Custom URL' ); ?></option>
-										</select>
-									</span>
+										<span class="setting">
+											<label for="attachment-display-settings-link-to" class="name"><?php esc_html_e( 'Link To' ); ?></label>
+											<select id="attachment-display-settings-link-to" class="link-to" data-setting="link">
+												<option value="none" selected=""><?php esc_html_e( 'None' ); ?></option>
+												<option value="file"><?php esc_html_e( 'Media File' ); ?></option>
+												<option value="post"><?php esc_html_e( 'Attachment Page' ); ?></option>
+												<option value="custom"><?php esc_html_e( 'Custom URL' ); ?></option>
+											</select>
+										</span>
 
-									<span class="setting">
-										<label for="attachment-display-settings-link-to-custom" class="name"><?php esc_html_e( 'URL' ); ?></label>
-										<input type="text" id="attachment-display-settings-link-to-custom" class="link-to-custom" data-setting="linkUrl">
-									</span>
+										<span class="setting">
+											<label for="attachment-display-settings-link-to-custom" class="name"><?php esc_html_e( 'URL' ); ?></label>
+											<input type="text" id="attachment-display-settings-link-to-custom" class="link-to-custom" data-setting="linkUrl">
+										</span>
 
-									<span class="setting">
-										<label for="attachment-display-settings-size" class="name"><?php _e( 'Size' ); ?></label>
-										<select id="attachment-display-settings-size" class="size" name="size" data-setting="size">
+										<span class="setting">
+											<label for="attachment-display-settings-size" class="name"><?php _e( 'Size' ); ?></label>
+											<select id="attachment-display-settings-size" class="size" name="size" data-setting="size">
 
-											<?php
-											/** This filter is documented in wp-admin/includes/media.php */
-											$sizes = apply_filters(
-												'image_size_names_choose',
-												wp_get_registered_image_subsizes()
-											);
+												<?php
+												/** This filter is documented in wp-admin/includes/media.php */
+												$sizes = apply_filters(
+													'image_size_names_choose',
+													wp_get_registered_image_subsizes()
+												);
 
-											foreach ( $sizes as $value => $name ) {
-												// Don't use sizes intended only for core
-												if ( in_array( $value, array( '1536x1536', '2048x2048' ), true ) ) {
-													continue;
+												foreach ( $sizes as $value => $name ) {
+													// Don't use sizes intended only for core
+													if ( in_array( $value, array( '1536x1536', '2048x2048' ), true ) ) {
+														continue;
+													}
+													?>
+
+													<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value ); ?>>
+														<?php echo esc_html( ucfirst( $value ) . ' &ndash; ' . $name['width'] . ' x '. $name['height'] ); ?>
+													</option>
+												
+													<?php
 												}
 												?>
 
-												<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value ); ?>>
-													<?php echo esc_html( ucfirst( $value ) . ' &ndash; ' . $name['width'] . ' x '. $name['height'] ); ?>
-												</option>
-												
-												<?php
-											}
-											?>
+											</select>
+										</span>
+									</div>
+								</div>
 
-										</select>
-									</span>
+								<div class="media-uploader-status" style="display: none;">
+									<h3><?php esc_html_e( 'Uploading' ); ?></h3>
+									<div class="media-progress-bar">
+										<div></div>
+									</div>
+									<div class="upload-details">
+										<span class="upload-count">
+											<span class="upload-index"></span> / <span class="upload-total"></span>
+										</span>
+										<span class="upload-detail-separator">–</span>
+										<span class="upload-filename"></span>
+									</div>
+									<div class="upload-errors"></div>
+									<button type="button" class="button upload-dismiss-errors"><?php esc_html_e( 'Dismiss errors' ); ?></button>
 								</div>
-							</div>
-
-							<div class="media-uploader-status" style="display: none;">
-								<h3><?php esc_html_e( 'Uploading' ); ?></h3>
-								<div class="media-progress-bar">
-									<div></div>
-								</div>
-								<div class="upload-details">
-									<span class="upload-count">
-										<span class="upload-index"></span> / <span class="upload-total"></span>
-									</span>
-									<span class="upload-detail-separator">–</span>
-									<span class="upload-filename"></span>
-								</div>
-								<div class="upload-errors"></div>
-								<button type="button" class="button upload-dismiss-errors"><?php esc_html_e( 'Dismiss errors' ); ?></button>
 							</div>
 						</div>
 
+					</div><!-- End of "media-frame-content" -->
+				</div><!-- End of "media-frame-tab-panel" -->
+
+				<div id="insert-from-url-panel" hidden inert>
+					<div id="media-frame-title-2" class="media-frame-title">
+						<h2><?php esc_html_e( 'Insert from URL' ); ?></h2>
 					</div>
-				</div>
-			</div>
+
+					<div class="media-frame-content">
+						<div class="media-embed">
+							<span class="embed-url">
+								<input id="embed-url-field" type="url" aria-labelledby="media-frame-title-2">
+								<span class="spinner"></span>
+							</span>
+
+							<div id="embed-media-settings" class="embed-media-settings" hidden>
+								<div class="wp-clearfix">
+									<div class="thumbnail">
+										<img src="" draggable="false" alt="">
+									</div>
+								</div>
+
+								<span class="setting alt-text has-description">
+									<label for="embed-image-settings-alt-text" class="name"><?php esc_html_e( 'Alternative Text' ); ?></label>
+									<textarea id="embed-image-settings-alt-text" data-setting="alt" aria-describedby="alt-text-description"></textarea>
+								</span>
+								<p class="description" id="alt-text-description"><a href="https://www.w3.org/WAI/tutorials/images/decision-tree" target="_blank" rel="noopener"><?php esc_html_e( 'Learn how to describe the purpose of the image' ); ?> <span class="screen-reader-text"><?php esc_html_e( '(opens in a new tab)' ); ?></span></a>. <?php esc_html_e( 'Leave empty if the image is purely decorative.' ); ?></p>
+
+								<span class="setting caption">
+									<label for="embed-image-settings-caption" class="name"><?php esc_html_e( 'Caption' ); ?></label>
+									<textarea id="embed-image-settings-caption" data-setting="caption"></textarea>
+								</span>
+
+								<fieldset class="setting-group">
+									<legend class="name"><?php esc_html_e( 'Align' ); ?></legend>
+									<span class="setting align">
+										<span class="button-group button-large" data-setting="align">
+											<button class="button" value="left"><?php esc_html_e( 'Left' ); ?></button>
+											<button class="button" value="center"><?php esc_html_e( 'Center' ); ?></button>
+											<button class="button" value="right"><?php esc_html_e( 'Right' ); ?></button>
+											<button class="button active" value="none"><?php esc_html_e( 'None' ); ?></button>
+										</span>
+									</span>
+								</fieldset>
+
+								<fieldset class="setting-group">
+									<legend class="name"><?php esc_html_e( 'Link To' ); ?></legend>
+									<span class="setting link-to">
+										<span class="button-group button-large" data-setting="link">
+											<button class="button" value="file" aria-pressed="false"><?php esc_html_e( 'Image URL' ); ?></button>
+											<button class="button active" value="custom" aria-pressed="true"><?php esc_html_e( 'Custom URL' ); ?></button>
+											<button class="button" value="none" aria-pressed="false"><?php esc_html_e( 'None' ); ?></button>
+										</span>
+									</span>
+									<span class="setting">
+										<label for="embed-image-settings-link-to-custom" class="name"><?php esc_html_e( 'URL' ); ?></label>
+										<input type="text" id="embed-image-settings-link-to-custom" class="link-to-custom" data-setting="linkUrl">
+									</span>
+								</fieldset>
+							</div>
+
+						</div>
+					</div>
+				</div><!-- End of "insert-from-url-panel" -->
+			</div><!-- End of "__wp-uploader-id-0" -->
 
 			<h3 class="media-frame-actions-heading screen-reader-text"><?php esc_html_e( 'Selected media actions' ); ?></h3>
 			<div class="media-frame-toolbar">

@@ -22,7 +22,10 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		search = document.getElementById( 'media-search-input' ),
 		mediaCatSelect = document.getElementById( 'taxonomy=media_category&term' ),
 		mediaGrid = document.querySelector( '#media-grid ul' ),
-		addButton = document.querySelector( '.media-button-insert' );
+		addButton = document.querySelector( '.media-button-insert' ),
+		uploadTab = document.getElementById( 'menu-item-upload' ),
+		browseTab = dialog.querySelector( '#menu-item-browse' ),
+		attachmentsBrowser = dialog.querySelector( '.attachments-browser' );
 
 	// Update details within modal
 	function setAddedMediaFields( id ) {
@@ -466,14 +469,65 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 	// Open modal to select item(s) to add to widget
 	document.addEventListener( 'click', function( e ) {
+		var heading, insert;
 		if ( e.target.className.includes( 'select-media' ) && e.target.parentNode.className === 'media-widget-buttons' ) {
 			if ( e.target.className.includes( 'change-media' ) ) {
 				changeMedia = true;
 			}
+
 			focusID = e.target.closest( 'li' ).id;
+			heading = dialog.querySelector( 'h2' );
+			insert = dialog.querySelector( '#menu-item-insert' );
 			widgetType = e.target.parentNode.previousElementSibling.className.replace( 'media-widget-preview ', '' );
+
+			if ( widgetType === 'media_image' ) {
+				heading.textContent = 'Add Image';
+				insert.textContent = 'Add Image';
+				uploader.setAttribute( 'allowedMimes', 'image/jpeg,image/gif,image/png,image/bmp,image/tiff,image/webp,image/x-icon,image/heic' );
+			} else if ( widgetType === 'media_audio' ) {
+				heading.textContent = 'Add Audio';
+				insert.textContent = 'Add Audio';
+				uploader.setAttribute( 'allowedMimes','audio/mpeg,audio/aac,audio/x-realaudio,audio/wav,audio/ogg,audio/flac,audio/midi,audio/x-ms-wma,audio/x-ms-wax,audio/x-matroska' );
+			} else if ( widgetType === 'media_video' ) {
+				heading.textContent = 'Add Video';
+				insert.textContent = 'Add Video';
+				uploader.setAttribute( 'allowedMimes','video/x-ms-asf,video/x-ms-wmv,video/x-ms-wmx,video/x-ms-wm,video/avi,video/divx,video/x-flv,video/quicktime,video/mpeg,video/mp4,video/ogg,video/webm,video/x-matroska,video/3gpp,video/3gpp2' );
+			} else if ( widgetType === 'media_gallery' ) {
+				heading.textContent = 'Create Gallery';
+				insert.textContent = 'Create Gallery';
+				uploader.setAttribute( 'allowedMimes', 'image/jpeg,image/gif,image/png,image/bmp,image/tiff,image/webp,image/x-icon,image/heic' );
+			}
+
 			updateGrid();
 			dialog.showModal();
+		}
+	} );
+
+	// Show correct modal content according to which tab is clicked
+	uploadTab.addEventListener( 'click', function() {
+		browseTab.classList.remove( 'active' );
+		uploadTab.classList.add( 'active' );
+		attachmentsBrowser.setAttribute( 'hidden', true );
+		attachmentsBrowser.setAttribute( 'inert', true );
+		uploader.removeAttribute( 'hidden' );
+		uploader.removeAttribute( 'inert' );
+	} );
+
+	browseTab.addEventListener( 'click', function() {
+		uploadTab.classList.remove( 'active' );
+		browseTab.classList.add( 'active' );
+		uploader.setAttribute( 'hidden', true );
+		uploader.setAttribute( 'inert', true );
+		attachmentsBrowser.removeAttribute( 'hidden' );
+		attachmentsBrowser.removeAttribute( 'inert' );
+	} );
+
+	// Ensure that video has the appropriate dimensions after a video widget is updated
+	document.addEventListener( 'widget-updated', function( e ) {
+		var videoShortcode = e.detail.widget.querySelector( '.wp-video-shortcode' );
+		if ( videoShortcode != null ) {
+			videoShortcode.setAttribute( 'width', '' );
+			videoShortcode.setAttribute( 'height', '' );
 		}
 	} );
 
@@ -568,6 +622,40 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		} );
 		closeButton.click();
 	} );
+
+
+/*
+ * $('.select-images').click(function(e) {
+                e.preventDefault();
+                var button = $(this);
+                var customUploader = wp.media({
+                    title: 'Select Images',
+                    button: {
+                        text: 'Use these images'
+                    },
+                    multiple: true
+                }).on('select', function() {
+                    var attachments = customUploader.state().get('selection').map(function(attachment) {
+                        attachment = attachment.toJSON();
+                        return attachment.id;
+                    });
+                    button.siblings('input[name*="attachment_ids"]').val(attachments.join(','));
+                    updateGalleryPreview(button.siblings('.gallery-preview'), attachments);
+                }).open();
+            });
+
+            function updateGalleryPreview(previewDiv, attachmentIds) {
+                previewDiv.empty();
+                attachmentIds.forEach(function(id) {
+                    wp.media.attachment(id).fetch().then(function() {
+                        var url = wp.media.attachment(id).get('url');
+                        previewDiv.append('<img src="' + url + '" style="width: 50px; height: 50px; object-fit: cover; margin: 2px;">');
+                    });
+                });
+            }
+            */
+
+
 
 	/* Close modal by clicking button */
 	closeButton.addEventListener( 'click', function() {
@@ -668,11 +756,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 						load( result.data );						
 						gridItem = populateGridItem( result.data );
 						mediaGrid.prepend( gridItem );
-
-						// Open modal to show details about file, or select file for deletion
-						gridItem.addEventListener( 'click', function() {
-							selectItemToAdd( gridItem );
-						} );
+						//addButton.removeAttribute( 'disabled' );						
 					} else {
 						error( _wpMediaGridSettings.upload_failed );
 					}
@@ -697,7 +781,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			new Promise( function( resolve ) {
 				resolve( window.prompt( _wpMediaGridSettings.new_filename, file.name ) );
 			} ),
-		acceptedFileTypes: document.querySelector( '.uploader-inline' ).dataset.allowedMimes.split( ',' ),
+		//acceptedFileTypes: uploader.dataset.allowedMimes.split( ',' ),
 		labelFileTypeNotAllowed: _wpMediaGridSettings.invalid_type,
 		fileValidateTypeLabelExpectedTypes: _wpMediaGridSettings.check_types,
 	} );

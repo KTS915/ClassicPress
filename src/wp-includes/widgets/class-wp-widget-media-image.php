@@ -56,19 +56,25 @@ class WP_Widget_Media_Image extends WP_Widget {
 		$link_url      = ! empty( $instance['link_url'] ) ? $instance['link_url'] : '';
 		$caption       = ! empty( $instance['caption'] ) ? $instance['caption'] : '';
 		$alt_text      = ! empty( $instance['alt_text'] ) ? $instance['alt_text'] : '';
+		$url           = ! empty( $instance['url'] ) ? $instance['url'] : '';
 
 		if ( ! empty( $title ) ) {
 			echo $args['before_title'] . $title . $args['after_title'];
 		}
 
-		if ( $attachment_id ) {
+		if ( $attachment_id || $url ) {
 			$image_html = wp_get_attachment_image( $attachment_id, $size, false, array( 'alt' => $alt_text ) );
 			
-			if ( $link_type === 'custom' && ! empty( $link_url ) ) {
+			if ( $attachment_id && $link_type === 'custom' && ! empty( $link_url ) ) {
 				$image_html = '<a href="' . esc_url( $link_url ) . '">' . $image_html . '</a>';
-			} elseif ( $link_type === 'file' ) {
+			} elseif ( $attachment_id && $link_type === 'file' ) {
 				$file_url = wp_get_attachment_url( $attachment_id );
 				$image_html = '<a href="' . esc_url( $file_url ) . '">' . $image_html . '</a>';
+			} elseif ( $url ) {
+				$image_html = '<img src="' . esc_url( $url ) . '" alt="' . esc_attr( $alt_text ) . '">';
+				if ( $link_type && $link_type !== 'none' && $link_url ) {
+					$image_html = '<a href="' . esc_url( $link_url ) . '">' . $image_html . '</a>';
+				}
 			}
 
 			if ( ! empty( $caption ) ) {
@@ -94,10 +100,11 @@ class WP_Widget_Media_Image extends WP_Widget {
 		$title         = ! empty( $instance['title'] ) ? $instance['title'] : '';
 		$attachment_id = ! empty( $instance['attachment_id'] ) ? $instance['attachment_id'] : 0;
 		$size          = ! empty( $instance['size'] ) ? $instance['size'] : 'full';
+		$alt_text      = ! empty( $instance['alt_text'] ) ? $instance['alt_text'] : '';
 		$link_type     = ! empty( $instance['link_type'] ) ? $instance['link_type'] : '';
 		$link_url      = ! empty( $instance['link_url'] ) ? $instance['link_url'] : '';
 		$caption       = ! empty( $instance['caption'] ) ? $instance['caption'] : '';
-		$alt_text      = ! empty( $instance['alt_text'] ) ? $instance['alt_text'] : '';
+		$url           = ! empty( $instance['url'] ) ? $instance['url'] : '';
 		?>
 
 		<div class="media-widget-control">
@@ -110,22 +117,55 @@ class WP_Widget_Media_Image extends WP_Widget {
 				<div class="media-widget-preview media_image">
 
 					<?php
-					if ( $attachment_id ) {
+					$image_html = '';
+					if ( $url ) {
+						$image_html = '<img src="' . esc_url( $url ) . '" alt="' . esc_attr( $alt_text ) . '">';
+					} elseif ( $attachment_id ) {
 						$raw_image = wp_get_attachment_image( $attachment_id, 'thumbnail' );
-						echo preg_replace( '~(height|width)="\d*"\s~', '', $raw_image );
+						$image_html = preg_replace( '~(height|width)="\d*"\s~', '', $raw_image );
 					}
+
+					if ( ! empty( $caption ) ) {
+						$image_html = '<figure>' . $image_html . '<figcaption>' . esc_html( $caption ) . '</figcaption></figure>';
+					}
+
+					echo $image_html;
 					?>
 
 				</div>
 						
 				<?php
-				if ( $attachment_id ) {
+				if ( $attachment_id || $url ) {
 				?>
 
 					<div class="media-widget-buttons">
 						<button type="button" class="button edit-media"><?php esc_html_e( 'Edit Image' ); ?></button>
 						<button type="button" class="button change-media select-media"><?php esc_html_e( 'Replace Image' ); ?></button>
 					</div>
+
+					<?php
+					if ( $link_type && $link_type !== 'none' && $link_url ) {
+					?>
+
+					<fieldset class="media-widget-image-link">
+						<label for="<?php echo $this->get_field_id( 'link_url' ); ?>"><?php esc_html_e( 'Link to:' ); ?></label>
+						<input id="<?php echo $this->get_field_id( 'link_url' ); ?>" class="widefat" name="<?php echo $this->get_field_name( 'link_url' ); ?>" type="url" value="<?php echo esc_url( $link_url ); ?>" data-link-url="link_url">
+						
+						<input id="<?php echo $this->get_field_id( 'link_type' ); ?>" class="widefat" name="<?php echo $this->get_field_name( 'link_type' ); ?>" type="hidden" value="<?php echo esc_attr( $link_type ); ?>" data-link-type="link_type">
+					</fieldset>
+
+					<?php
+					} else {
+					?>
+
+					<fieldset class="media-widget-image-link">
+						<input id="<?php echo $this->get_field_id( 'link_type' ); ?>" class="widefat" name="<?php echo $this->get_field_name( 'link_type' ); ?>" type="hidden" value="<?php echo esc_attr( $link_type ); ?>" data-link-type="link_type">
+						<input id="<?php echo $this->get_field_id( 'link_url' ); ?>" class="widefat" name="<?php echo $this->get_field_name( 'link_url' ); ?>" type="hidden" value="<?php echo esc_url( $link_url ); ?>" data-link-url="link_url">
+					</fieldset>
+
+					<?php
+					}
+					?>
 
 				<?php
 				} else {
@@ -143,11 +183,12 @@ class WP_Widget_Media_Image extends WP_Widget {
 
 			<div> 
 				<input class="widefat" id="<?php echo $this->get_field_id( 'attachment_id' ); ?>" name="<?php echo $this->get_field_name( 'attachment_id' ); ?>" type="hidden" data-property="attachment_id" value="<?php echo esc_attr( $attachment_id ); ?>">
-				<input class="widefat" id="<?php echo $this->get_field_id('size'); ?>" name="<?php echo $this->get_field_name( 'size' ); ?>" type="hidden" data-property="size" value="<?php echo esc_attr( $size ); ?>">
-				<input class="widefat" id="<?php echo $this->get_field_id( 'link_type' ); ?>" name="<?php echo $this->get_field_name( 'link_type' ); ?>" type="hidden" data-property="link_type" value="<?php echo esc_attr( $link_type ); ?>">
-				<input class="widefat" id="<?php echo $this->get_field_id( 'link_url' ); ?>" name="<?php echo $this->get_field_name( 'link_url' ); ?>" type="hidden" data-property="link_url" value="<?php echo esc_attr( $link_url ); ?>">
-				<input class="widefat" id="<?php echo $this->get_field_id( 'caption' ); ?>" name="<?php echo $this->get_field_name( 'caption' ); ?>" type="hidden" data-property="caption" value="<?php echo esc_attr( $caption ); ?>">
-				<input class="widefat" id="<?php echo $this->get_field_id( 'alt_text' ); ?>" name="<?php echo $this->get_field_name( 'alt_text' ); ?>" type="hidden" data-property="alt_text" value="<?php echo esc_attr( $alt_text ); ?>">
+				<input class="widefat" id="<?php echo $this->get_field_id('size'); ?>" name="<?php echo $this->get_field_name( 'size' ); ?>" type="hidden" data-property="size">
+				<input class="widefat" id="<?php echo $this->get_field_id( 'link_type' ); ?>" name="<?php echo $this->get_field_name( 'link_type' ); ?>" type="hidden" data-property="link_type">
+				<input class="widefat" id="<?php echo $this->get_field_id( 'link_url' ); ?>" name="<?php echo $this->get_field_name( 'link_url' ); ?>" type="hidden" data-property="link_url">
+				<input class="widefat" id="<?php echo $this->get_field_id( 'caption' ); ?>" name="<?php echo $this->get_field_name( 'caption' ); ?>" type="hidden" data-property="caption">
+				<input class="widefat" id="<?php echo $this->get_field_id( 'alt_text' ); ?>" name="<?php echo $this->get_field_name( 'alt_text' ); ?>" type="hidden" data-property="alt_text">
+				<input class="widefat" id="<?php echo $this->get_field_id( 'url' ); ?>" name="<?php echo $this->get_field_name( 'url' ); ?>" type="hidden" data-property="url">
 			</div>
 		</div>
 
@@ -175,6 +216,7 @@ class WP_Widget_Media_Image extends WP_Widget {
 		$instance['link_url']      = ! empty( $new_instance['link_url'] ) ? sanitize_url( $new_instance['link_url'] ) : '';
 		$instance['caption']       = ! empty( $new_instance['caption'] ) ? wp_kses_post( $new_instance['caption'] ) : '';
 		$instance['alt_text']      = ! empty( $new_instance['alt_text'] ) ? sanitize_text_field( $new_instance['alt_text'] ) : '';
+		$instance['url']           = ! empty( $new_instance['url'] ) ? sanitize_url( $new_instance['url'] ) : '';
 
 		return $instance;
 	}

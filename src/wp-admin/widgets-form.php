@@ -838,7 +838,7 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 
 										<span class="setting">
 											<label for="attachment-display-settings-link-to-custom" class="name"><?php esc_html_e( 'URL' ); ?></label>
-											<input type="url" id="attachment-display-settings-link-to-custom" class="link-to-custom" data-setting="linkUrl">
+											<input id="attachment-display-settings-link-to-custom" type="url" class="link-to-custom" data-setting="linkUrl">
 										</span>
 
 										<span class="setting">

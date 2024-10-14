@@ -6,7 +6,7 @@
  * @since CP 2.3.0
  */
 document.addEventListener( 'DOMContentLoaded', function() {
-	var pond, itemID, focusID, acceptedFileTypes,
+	var pond, itemID, focusID, widgetID, acceptedFileTypes, urlForInsertion, altText, caption, linkType, linkToUrl,
 		{ FilePond } = window, // import FilePond
 		widgetType = 'media_image',
 		changeMedia = false,
@@ -445,7 +445,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				if ( e.target.className.includes( 'change-media' ) ) {
 					changeMedia = true;
 				}
-				focusID = e.target.closest( 'li' ).id;
+				widgetID = e.target.closest( 'li' ).id;
 				widgetType = e.target.parentNode.previousElementSibling.className.replace( 'media-widget-preview ', '' );
 				updateGrid();
 				dialog.showModal();
@@ -464,20 +464,22 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 	// Open modal to select item(s) to add to widget
 	document.addEventListener( 'click', function( e ) {
-		var heading, insert, filepondBrowser,
-			widget = e.target.closest( '.widget' ),
-			embedTab = dialog.querySelector( '#menu-item-embed' ),
-			embedMediaSettings = dialog.querySelector( '#embed-media-settings' )
-			embedUrlField = dialog.querySelector( '#embed-url-field' );
+		var widget, heading, insert, filepondBrowser, clonedImage,
+			embedTab, embedMediaSettings, embedUrlField, options;
 
 		if ( e.target.className.includes( 'select-media' ) && ( e.target.parentNode.className === 'media-widget-buttons' || e.target.parentNode.className === 'attachment-media-view' ) ) {
 			if ( e.target.className.includes( 'change-media' ) ) {
 				changeMedia = true;
 			}
 
-			focusID = e.target.closest( 'li' ).id;
+			widget = e.target.closest( 'li' ),
+			widgetID = widget.id;
 			heading = dialog.querySelector( 'h2' );
 			insert = dialog.querySelector( '#menu-item-insert' );
+			embedTab = dialog.querySelector( '#menu-item-embed' ),
+			embedMediaSettings = dialog.querySelector( '#embed-media-settings' )
+			embedUrlField = dialog.querySelector( '#embed-url-field' ),
+			options = dialog.querySelectorAll( '#link-to option' );
 			filepondBrowser = dialog.querySelector( '.filepond--browser' );
 			widgetType = e.target.parentNode.previousElementSibling.className.replace( 'media-widget-preview ', '' );
 
@@ -492,9 +494,34 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				embedTab.style.display = '';
 				embedMediaSettings.removeAttribute( 'hidden' );
 				if ( changeMedia === true ) {
+					clonedImage = widget.querySelector( 'img' ).cloneNode( true );
+					dialog.querySelector( '.thumbnail' ).append( clonedImage );
+
 					embedUrlField.value = widget.querySelector( 'img' ).src;
 					dialog.querySelector( '#embed-image-settings-alt-text' ).value = widget.querySelector( 'img' ).getAttribute( 'alt' );
-					dialog.querySelector( '#embed-image-settings-caption' ).value = '';
+
+					if ( widget.querySelector( 'figcaption' ) != null ) {
+						caption = widget.querySelector( 'figcaption' ).textContent;
+						dialog.querySelector( '#embed-image-settings-caption' ).value = caption;
+					}
+
+					linkType = widget.querySelector( 'input[data-link-type="link_type"]' ).value;
+					dialog.querySelector( '#link-to' ).value = linkType;
+
+					options.forEach( function( option ) {
+						if ( option.hasAttribute( 'selected' ) ) {
+							option.removeAttribute( 'selected' );
+						}
+					} );
+
+					options.forEach( function( option ) {
+						if ( option.value === linkType ) {
+							option.setAttribute( 'selected', true );
+						}
+					} );
+
+					linkToUrl = widget.querySelector( 'input[data-link-url="link_url"]' ).value;
+					dialog.querySelector( '#embed-image-settings-link-to-custom' ).value = linkToUrl;
 				}
 
 			// Audio widget
@@ -598,7 +625,77 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			mediaFramePanel.setAttribute( 'inert', true );
 			insertFromUrlPanel.removeAttribute( 'hidden' );
 			insertFromUrlPanel.removeAttribute( 'inert' );
+			urlForInsertion = dialog.querySelector( '#embed-url-field' ).value;
+			altText = dialog.querySelector( '#embed-image-settings-alt-text' ).value;
+			caption = dialog.querySelector( '#embed-image-settings-caption' ).value;
+			linkType = dialog.querySelector( '#link-to' ).value;
+			linkToUrl = dialog.querySelector( '#link-to-url' ).value;
 		}
+
+		insertFromUrlPanel.querySelector( '#embed-url-field' ).addEventListener( 'change', function( evt ) {
+			urlForInsertion = evt.target.value;
+			if ( addButton.disabled ) {
+				addButton.removeAttribute( 'disabled' );
+			}
+		} );
+
+		insertFromUrlPanel.querySelector( '#embed-image-settings-alt-text' ).addEventListener( 'change', function( evt ) {
+			altText = evt.target.value;
+			if ( addButton.disabled ) {
+				addButton.removeAttribute( 'disabled' );
+			}
+		} );
+
+		insertFromUrlPanel.querySelector( '#embed-image-settings-caption' ).addEventListener( 'change', function( evt ) {
+			caption = evt.target.value;
+			if ( addButton.disabled ) {
+				addButton.removeAttribute( 'disabled' );
+			}
+		} );
+
+		insertFromUrlPanel.querySelector( '#link-to' ).addEventListener( 'change', function( evt ) {
+			var options = evt.target.querySelectorAll( 'option' ),
+				linkToField = insertFromUrlPanel.querySelector( '#link-to-url' );
+
+			linkType = evt.target.value;
+
+			options.forEach( function( option ) {
+				if ( option.hasAttribute( 'selected' ) ) {
+					option.removeAttribute( 'selected' );
+				}
+			} );
+
+			options.forEach( function( option ) {
+				if ( option.value === linkType ) {
+					option.setAttribute( 'selected', true );
+				}
+			} );
+
+			linkToUrl = '';
+			if ( linkType === 'custom' ) {
+				linkToField.removeAttribute( 'hidden' );
+				linkToField.removeAttribute( 'inert' );
+			} else if ( linkType === 'file' ) {
+				linkToUrl = urlForInsertion;
+				linkToField.setAttribute( 'hidden', true );
+				linkToField.setAttribute( 'inert', true );
+			} else {
+				linkToUrl = '';
+				linkToField.setAttribute( 'hidden', true );
+				linkToField.setAttribute( 'inert', true );
+			}
+
+			if ( addButton.disabled ) {
+				addButton.removeAttribute( 'disabled' );
+			}
+		} );
+
+		insertFromUrlPanel.querySelector( '#embed-image-settings-link-to-custom' ).addEventListener( 'change', function( evt ) {
+			linkToUrl = evt.target.value;
+			if ( addButton.disabled ) {
+				addButton.removeAttribute( 'disabled' );
+			}
+		} );
 	} );
 
 	// Ensure that video has the appropriate dimensions after a video widget is updated
@@ -612,10 +709,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 	// Set functions for Escape and Enter keys
 	document.addEventListener( 'keyup', function( e ) {
+		var widget = document.getElementById( widgetID );
 		if ( e.key === 'Escape' ) {
 			changeMedia = false;
-			document.getElementById( focusID ).querySelector( 'details' ).open = true;
-			document.getElementById( focusID ).querySelector( '.select-media' ).focus();
+			widget.querySelector( 'details' ).open = true;
+			widget.querySelector( '.select-media' ).focus();
 		} else if ( e.key === 'Enter' && e.target.className === 'media-item' ) {
 			e.target.click(); // open modal
 		}
@@ -630,11 +728,12 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 	/* Add item(s) to widget */
 	addButton.addEventListener( 'click', function() {
-		document.querySelectorAll( '.media-item.selected' ).forEach( function( selectedItem ) {
-			var addedElement, source,
-				widget = document.getElementById( focusID ),
-				preview = widget.querySelector( '.media-widget-preview' ),
-				modalSidebar = dialog.querySelector( '.media-sidebar' );
+		var addedElement, source,
+			widget = document.getElementById( widgetID ),
+			preview = widget.querySelector( '.media-widget-preview' );
+
+		// Add audio, video, or image from URL
+		if ( ! dialog.querySelector( '#insert-from-url-panel' ).hasAttribute( 'hidden' ) ) {
 
 			if ( changeMedia === true ) {
 				preview.innerHTML = '';
@@ -643,62 +742,102 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				preview.classList.add( 'populated' );
 			}
 
-			// Create audio element
-			if ( widgetType === 'media_audio' ) {
-				addedElement = document.createElement( 'audio' );
+			// Add audio or video
+			if ( widgetType === 'media_audio' || widgetType === 'media_video') {
+				if ( widgetType === 'media_audio' ) {
+					addedElement = document.createElement( 'audio' );
+				} else if ( widgetType === 'media_video' ) {
+					addedElement = document.createElement( 'video' );
+				}
+
 				addedElement.className = 'mejs-mediaelement';
 				addedElement.controls = true;
-				addedElement.src = selectedItem.dataset.url;
+				addedElement.src = urlForInsertion;
 
 				// Create source element
 				source = document.createElement( 'source' );
-				source.src = selectedItem.dataset.url;
-				source.type = selectedItem.dataset.mime;
+				source.src = urlForInsertion;
 
 				// Append source to audio
 				addedElement.append( source );
 
-			// Create video element
-			} else if ( widgetType === 'media_video' ) {
-				addedElement = document.createElement( 'video' );
-				addedElement.className = 'mejs-mediaelement';
-				addedElement.controls = true;
-				addedElement.src = selectedItem.dataset.url;
-
-				// Create source element
-				source = document.createElement( 'source' );
-				source.src = selectedItem.dataset.url;
-				source.type = selectedItem.dataset.mime;
-
-				// Append source to video
-				addedElement.append( source );
-
-			// Create image element
-			} else {
-				addedElement = selectedItem.querySelector( 'img' );
-				addedElement.className = 'attachment-thumb';
+			// Add image
+			} else if ( widgetType === 'media_image' ) {
+				addedElement = document.createElement( 'img' );
+				addedElement.src = urlForInsertion;
+				addedElement.className = 'attachment-thumbnail';
+				widget.querySelector( 'input[data-property="alt_text"]' ).value = altText ? altText : '';
+				widget.querySelector( 'input[data-property="caption"]' ).value = caption ? caption : '';
+				widget.querySelector( 'input[data-property="link_type"]' ).value = linkType ? linkType : 'none';
+				widget.querySelector( 'input[data-property="link_url"]' ).value = linkToUrl ? linkToUrl : '';
 			}
 
 			if ( widget.querySelector( '.attachment-media-view' ) != null ) {
 				widget.querySelector( '.attachment-media-view' ).remove();
 			}
 
-			// Add values to widget-content fields
-			if ( widgetType === 'media_image' || widgetType === 'media_gallery' ) {
-				preview.append( addedElement );
-				widget.querySelector( 'input[data-property="attachment_id"]' ).value = selectedItem.id.replace( 'media-', '' );
-				widget.querySelector( 'input[data-property="size"]' ).value = modalSidebar.querySelector( '.size' ).value;
-				widget.querySelector( 'input[data-property="link_type"]' ).value = modalSidebar.querySelector( '.link-to' ).value;
-				widget.querySelector( 'input[data-property="link_url"]' ).value = modalSidebar.querySelector( '.link-to-custom' ).value;
-				widget.querySelector( 'input[data-property="caption"]' ).value = modalSidebar.querySelector( '#attachment-details-two-column-caption' ).textContent;
-				widget.querySelector( 'input[data-property="alt_text"]' ).value = modalSidebar.querySelector( '#attachment-details-two-column-alt-text' ).textContent;
-			} else if ( widgetType === 'media_audio' || widgetType === 'media_video' ) {
-				preview.append( addedElement );
-				widget.querySelector( 'input[data-property="attachment_id"]' ).value = selectedItem.id.replace( 'media-', '' );
-			}
-
+			preview.append( addedElement );
+			widget.querySelector( 'input[data-property="url"]' ).value = urlForInsertion;
+			document.getElementById( widgetID ).classList.add( 'widget-dirty' );
 			widget.dispatchEvent( new Event( 'change' ) );
-		} );
+
+		// Add audio, video, or image from Media Library
+		} else {
+			document.querySelectorAll( '.media-item.selected' ).forEach( function( selectedItem ) {
+				var modalSidebar = dialog.querySelector( '.media-sidebar' );
+
+				if ( changeMedia === true ) {
+					preview.innerHTML = '';
+				} else {				
+					preview.classList.add( widgetType );
+					preview.classList.add( 'populated' );
+				}
+
+				// Add audio or video
+				if ( widgetType === 'media_audio' || widgetType === 'media_video') {
+					if ( widgetType === 'media_audio' ) {
+						addedElement = document.createElement( 'audio' );
+					} else if ( widgetType === 'media_video' ) {
+						addedElement = document.createElement( 'video' );
+					}
+					addedElement.className = 'mejs-mediaelement';
+					addedElement.controls = true;
+					addedElement.src = selectedItem.dataset.url;
+
+					// Create source element
+					source = document.createElement( 'source' );
+					source.src = selectedItem.dataset.url;
+					source.type = selectedItem.dataset.mime;
+
+					// Append source to audio
+					addedElement.append( source );
+
+				// Add image
+				} else {
+					addedElement = selectedItem.querySelector( 'img' );
+					addedElement.className = 'attachment-thumb';
+				}
+
+				if ( widget.querySelector( '.attachment-media-view' ) != null ) {
+					widget.querySelector( '.attachment-media-view' ).remove();
+				}
+
+				// Add values to widget-content fields
+				if ( widgetType === 'media_audio' || widgetType === 'media_video' ) {					
+					widget.querySelector( 'input[data-property="attachment_id"]' ).value = selectedItem.id.replace( 'media-', '' );
+				} else if ( widgetType === 'media_image' || widgetType === 'media_gallery' ) {
+					widget.querySelector( 'input[data-property="attachment_id"]' ).value = selectedItem.id.replace( 'media-', '' );
+					widget.querySelector( 'input[data-property="size"]' ).value = modalSidebar.querySelector( '.size' ).value;
+					widget.querySelector( 'input[data-property="link_type"]' ).value = modalSidebar.querySelector( '.link-to' ).value;
+					widget.querySelector( 'input[data-property="link_url"]' ).value = modalSidebar.querySelector( '.link-to-custom' ).value;
+					widget.querySelector( 'input[data-property="caption"]' ).value = modalSidebar.querySelector( '#attachment-details-two-column-caption' ).textContent;
+					widget.querySelector( 'input[data-property="alt_text"]' ).value = modalSidebar.querySelector( '#attachment-details-two-column-alt-text' ).textContent;
+				}
+
+				preview.append( addedElement );
+				widget.dispatchEvent( new Event( 'change' ) );
+			} );
+		}
 		closeButton.click();
 	} );
 
@@ -738,20 +877,22 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 	/* Close modal by clicking button */
 	closeButton.addEventListener( 'click', function() {
-		var selectMedia = document.getElementById( focusID ).querySelector( '.select-media' );
+		var selectMedia = document.getElementById( widgetID ).querySelector( '.select-media' );
 
 		changeMedia = false;
 
 		dialog.classList.remove( 'modal-loading' );
 		dialog.close();
 
-		if ( focusID != null ) { // set focus correctly
+		// Set focus correctly
+		if ( widgetID != null ) {
 			if ( selectMedia != null ) {
 				selectMedia.focus();
 			} else {
-				document.getElementById( focusID ).querySelector( '.widget-control-save' ).focus();
+				document.getElementById( widgetID ).querySelector( '.widget-control-save' ).focus();
 			}
-			focusID = null; // reset focusID
+		} else {
+			document.getElementById( focusID ).focus();
 		}
 		removeImageEditWrap();
 	} );
@@ -807,7 +948,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 	// Create a FilePond instance
 	pond = FilePond.create( inputElement, {
-		allowMultiple: true,
+		allowMultiple: false,
 		server: {
 			process: function( fieldName, file, metadata, load, error, progress, abort, transfer, options ) {
 
@@ -835,7 +976,6 @@ document.addEventListener( 'DOMContentLoaded', function() {
 						load( result.data );						
 						gridItem = populateGridItem( result.data );
 						mediaGrid.prepend( gridItem );
-						//addButton.removeAttribute( 'disabled' );						
 					} else {
 						error( _wpMediaGridSettings.upload_failed );
 					}

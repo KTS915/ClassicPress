@@ -462,6 +462,14 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		searchtimer = setTimeout( updateGrid, 200 );
 	} );
 
+	// Update "Link URL" field in Image widget
+	document.querySelectorAll( 'input[data-link-url="link_url"]' ).forEach( function( link ) {
+		link.addEventListener( 'change', function( e ) {
+			var widget = e.target.closest( 'li' );
+			widget.querySelector( 'input[data-property="link_url"]' ).value = e.target.value;
+		} );
+	} );
+
 	// Open modal to select item(s) to add to widget
 	document.addEventListener( 'click', function( e ) {
 		var widget, heading, insert, filepondBrowser, clonedImage,
@@ -883,6 +891,18 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 		dialog.classList.remove( 'modal-loading' );
 		dialog.close();
+
+		// Clear all fields on the Insert from URL panel
+		document.getElementById( 'insert-from-url-panel' ).querySelectorAll( 'input, textarea, img' ).forEach( function( input ) {
+			if ( input.tagName === 'INPUT' ) {
+				input.value = '';
+			} else if ( input.tagName === 'TEXTAREA' ) {
+				input.textContent = '';
+			} else if ( input.tagName === 'IMG' ) {
+				input.remove();
+			}
+		} );
+		document.getElementById( 'link-to' ).value = 'none';
 
 		// Set focus correctly
 		if ( widgetID != null ) {

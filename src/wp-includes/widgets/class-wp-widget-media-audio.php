@@ -67,14 +67,15 @@ class WP_Widget_Media_Audio extends WP_Widget {
 		echo $args['before_widget'];
 
 		$title         = ! empty( $instance['title'] ) ? $instance['title'] : '';
-		$attachment_id = ! empty( $instance['attachment_id'] ) ? absint( $instance['attachment_id'] ) : 0;
+		$attachment_id = ! empty( $instance['attachment_id'] ) ? $instance['attachment_id'] : 0;
+		$url           = ! empty( $instance['url'] ) ? $instance['url'] : '';
 
 		if ( ! empty( $title ) ) {
 			echo $args['before_title'] . $title . $args['after_title'];
 		}
 
-		if ( $attachment_id ) {
-			$audio_url = wp_get_attachment_url( $attachment_id );
+		if ( $attachment_id || $url ) {
+			$audio_url = $attachment_id ? wp_get_attachment_url( $attachment_id ) : $url;
 			if ( $audio_url ) {
 				echo wp_audio_shortcode( array( 'src' => $audio_url ) );
 			}
@@ -93,6 +94,7 @@ class WP_Widget_Media_Audio extends WP_Widget {
 	public function form( $instance ) {
 		$title         = ! empty( $instance['title'] ) ? $instance['title'] : '';
 		$attachment_id = ! empty( $instance['attachment_id'] ) ? $instance['attachment_id'] : 0;
+		$url           = ! empty( $instance['url'] ) ? $instance['url'] : '';
 		?>
 
 		<div class="media-widget-control">
@@ -105,8 +107,8 @@ class WP_Widget_Media_Audio extends WP_Widget {
 				<div class="media-widget-preview media_audio">
 
 					<?php
-					if ( $attachment_id ) {
-						$audio_url = wp_get_attachment_url( $attachment_id );
+					if ( $attachment_id || $url ) {
+						$audio_url = $attachment_id ? wp_get_attachment_url( $attachment_id ) : $url;
 						echo wp_audio_shortcode( array( 'src' => $audio_url ) );
 					}
 					?>
@@ -114,7 +116,7 @@ class WP_Widget_Media_Audio extends WP_Widget {
 				</div>
 						
 				<?php
-				if ( $attachment_id ) {
+				if ( $attachment_id || $url ) {
 				?>
 
 					<div class="media-widget-buttons">
@@ -138,6 +140,7 @@ class WP_Widget_Media_Audio extends WP_Widget {
 
 			<div> 
 				<input class="widefat" id="<?php echo $this->get_field_id( 'attachment_id' ); ?>" name="<?php echo $this->get_field_name( 'attachment_id' ); ?>" type="hidden" data-property="attachment_id" value="<?php echo esc_attr( $attachment_id ); ?>">
+				<input class="widefat" id="<?php echo $this->get_field_id( 'url' ); ?>" name="<?php echo $this->get_field_name( 'url' ); ?>" type="hidden" data-property="url" value="<?php echo esc_url( $url ); ?>">
 			</div>
 		</div>
 
@@ -158,6 +161,7 @@ class WP_Widget_Media_Audio extends WP_Widget {
 		$instance = array();
 		$instance['title']         = ! empty( $new_instance['title'] ) ? sanitize_text_field( $new_instance['title'] ) : '';
 		$instance['attachment_id'] = ! empty( $new_instance['attachment_id'] ) ? absint( $new_instance['attachment_id'] ) : 0;
+		$instance['url']           = ! empty( $new_instance['url'] ) ? sanitize_url( $new_instance['url'] ) : '';
 
 		return $instance;
 	}

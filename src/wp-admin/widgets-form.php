@@ -765,21 +765,26 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 											<textarea id="attachment-details-two-column-alt-text" aria-describedby="alt-text-description"></textarea>
 										</span>
 										<p class="description" id="alt-text-description"><a href="https://www.w3.org/WAI/tutorials/images/decision-tree" target="_blank" rel="noopener"><?php esc_html_e( 'Learn how to describe the purpose of the image' ); ?><span class="screen-reader-text"> <?php esc_html_e( '(opens in a new tab)' ); ?></span></a><?php esc_html_e( '. Leave empty if the image is purely decorative.' ); ?></p>
+
 										<span class="setting" data-setting="title">
 											<label for="attachment-details-two-column-title" class="name"><?php esc_html_e( 'Title' ); ?></label>
 											<input type="text" id="attachment-details-two-column-title" value="">
 										</span>
+
 										<span class="setting settings-save-status" role="status">
 											<span id="details-saved" class="success hidden" aria-hidden="true"><?php esc_html_e( 'Saved!' ); ?></span>
 										</span>
+
 										<span class="setting" data-setting="caption">
 											<label for="attachment-details-two-column-caption" class="name"><?php esc_html_e( 'Caption' ); ?></label>
 											<textarea id="attachment-details-two-column-caption"></textarea>
 										</span>
+
 										<span class="setting" data-setting="description">
 											<label for="attachment-details-two-column-description" class="name"><?php esc_html_e( 'Description' ); ?></label>
 											<textarea id="attachment-details-two-column-description"></textarea>
 										</span>
+
 										<span class="setting" data-setting="url">
 											<label for="attachment-details-two-column-copy-link" class="name"><?php esc_html_e( 'File URL' ); ?></label>
 											<input type="text" class="attachment-details-copy-link" id="attachment-details-two-column-copy-link" value="" readonly="">
@@ -821,16 +826,6 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 									<div class="attachment-display-settings">
 										<h3><?php esc_html_e( 'Attachment Display Settings' ); ?></h3>
 
-										<span class="setting align">
-											<label for="attachment-display-settings-alignment" class="name"><?php esc_html_e( 'Alignment' ); ?></label>
-											<select id="attachment-display-settings-alignment" class="alignment" data-setting="align">
-												<option value="left"><?php esc_html_e( 'Left' ); ?></option>
-												<option value="center"><?php esc_html_e( 'Center' ); ?></option>
-												<option value="right"><?php esc_html_e( 'Right' ); ?></option>
-												<option value="none" selected=""><?php esc_html_e( 'None' ); ?></option>
-											</select>
-										</span>
-
 										<span class="setting">
 											<label for="attachment-display-settings-link-to" class="name"><?php esc_html_e( 'Link To' ); ?></label>
 											<select id="attachment-display-settings-link-to" class="link-to" data-setting="link">
@@ -843,7 +838,7 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 
 										<span class="setting">
 											<label for="attachment-display-settings-link-to-custom" class="name"><?php esc_html_e( 'URL' ); ?></label>
-											<input type="text" id="attachment-display-settings-link-to-custom" class="link-to-custom" data-setting="linkUrl">
+											<input type="url" id="attachment-display-settings-link-to-custom" class="link-to-custom" data-setting="linkUrl">
 										</span>
 
 										<span class="setting">
@@ -912,9 +907,7 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 
 							<div id="embed-media-settings" class="embed-media-settings" hidden>
 								<div class="wp-clearfix">
-									<div class="thumbnail">
-										<img src="" draggable="false" alt="">
-									</div>
+									<div class="thumbnail"></div>
 								</div>
 
 								<span class="setting alt-text has-description">
@@ -929,30 +922,18 @@ foreach ( $theme_sidebars as $sidebar => $registered_sidebar ) {
 								</span>
 
 								<fieldset class="setting-group">
-									<legend class="name"><?php esc_html_e( 'Align' ); ?></legend>
-									<span class="setting align">
-										<span class="button-group button-large" data-setting="align">
-											<button class="button" value="left"><?php esc_html_e( 'Left' ); ?></button>
-											<button class="button" value="center"><?php esc_html_e( 'Center' ); ?></button>
-											<button class="button" value="right"><?php esc_html_e( 'Right' ); ?></button>
-											<button class="button active" value="none"><?php esc_html_e( 'None' ); ?></button>
-										</span>
-									</span>
-								</fieldset>
-
-								<fieldset class="setting-group">
 									<legend class="name"><?php esc_html_e( 'Link To' ); ?></legend>
-									<span class="setting link-to">
-										<span class="button-group button-large" data-setting="link">
-											<button class="button" value="file" aria-pressed="false"><?php esc_html_e( 'Image URL' ); ?></button>
-											<button class="button active" value="custom" aria-pressed="true"><?php esc_html_e( 'Custom URL' ); ?></button>
-											<button class="button" value="none" aria-pressed="false"><?php esc_html_e( 'None' ); ?></button>
-										</span>
-									</span>
-									<span class="setting">
+									<div class="setting link-to">
+										<select id="link-to" name="link-to" data-setting="link">
+											<option value="none" selected><?php esc_html_e( 'None' ); ?></option>
+											<option value="file"><?php esc_html_e( 'Image URL' ); ?></option>
+											<option value="custom"><?php esc_html_e( 'Custom URL' ); ?></option>
+										</select>
+									</div>
+									<div id="link-to-url" hidden inert>
 										<label for="embed-image-settings-link-to-custom" class="name"><?php esc_html_e( 'URL' ); ?></label>
-										<input type="text" id="embed-image-settings-link-to-custom" class="link-to-custom" data-setting="linkUrl">
-									</span>
+										<input type="url" id="embed-image-settings-link-to-custom" class="link-to-custom" style="width:100%;" data-setting="linkUrl">
+									</div>
 								</fieldset>
 							</div>
 

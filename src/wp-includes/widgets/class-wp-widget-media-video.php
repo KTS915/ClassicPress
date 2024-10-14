@@ -52,14 +52,15 @@ class WP_Widget_Media_Video extends WP_Widget {
         echo $args['before_widget'];
 
         $title         = ! empty( $instance['title'] ) ? apply_filters( 'widget_title', $instance['title'] ) : '';
-        $attachment_id = ! empty( $instance['attachment_id'] ) ? $instance['attachment_id'] : '';
+        $attachment_id = ! empty( $instance['attachment_id'] ) ? $instance['attachment_id'] : 0;
+		$url           = ! empty( $instance['url'] ) ? $instance['url'] : '';
 
         if ( ! empty( $title ) ) {
             echo $args['before_title'] . $title . $args['after_title'];
         }
 
-        if ( ! empty( $attachment_id ) ) {
-            $video_url = wp_get_attachment_url( $attachment_id );
+        if ( $attachment_id || $url ) {
+			$video_url = $attachment_id ? wp_get_attachment_url( $attachment_id ) : $url;
             echo wp_video_shortcode( array( 'src' => $video_url ) );
         }
 
@@ -78,6 +79,7 @@ class WP_Widget_Media_Video extends WP_Widget {
     public function form( $instance ) {
 		$title         = ! empty( $instance['title'] ) ? $instance['title'] : '';
 		$attachment_id = ! empty( $instance['attachment_id'] ) ? $instance['attachment_id'] : 0;
+		$url           = ! empty( $instance['url'] ) ? $instance['url'] : '';
 		?>
 
 		<div class="media-widget-control">
@@ -90,8 +92,8 @@ class WP_Widget_Media_Video extends WP_Widget {
 				<div class="media-widget-preview media_video">
 
 					<?php
-					if ( $attachment_id ) {
-						$video_url = wp_get_attachment_url( $attachment_id );
+					if ( $attachment_id || $url ) {
+						$video_url = $attachment_id ? wp_get_attachment_url( $attachment_id ) : $url;
 						echo wp_video_shortcode(
 							array(
 								'src'   => $video_url,
@@ -104,7 +106,7 @@ class WP_Widget_Media_Video extends WP_Widget {
 				</div>
 						
 				<?php
-				if ( $attachment_id ) {
+				if ( $attachment_id || $url ) {
 				?>
 					<div class="media-widget-buttons">
 						<button type="button" class="button edit-media"><?php esc_html_e( 'Edit Video' ); ?></button>
@@ -127,6 +129,7 @@ class WP_Widget_Media_Video extends WP_Widget {
 
 			<div> 
 				<input class="widefat" id="<?php echo $this->get_field_id( 'attachment_id' ); ?>" name="<?php echo $this->get_field_name( 'attachment_id' ); ?>" type="hidden" data-property="attachment_id" value="<?php echo esc_attr( $attachment_id ); ?>">
+				<input class="widefat" id="<?php echo $this->get_field_id( 'url' ); ?>" name="<?php echo $this->get_field_name( 'url' ); ?>" type="hidden" data-property="url" value="<?php echo esc_url( $url ); ?>">
 			</div>
 		</div>
 
@@ -147,8 +150,9 @@ class WP_Widget_Media_Video extends WP_Widget {
 	 */
     public function update( $new_instance, $old_instance ) {
         $instance = array();       
-		$instance['title']          = ! empty( $new_instance['title'] ) ? sanitize_text_field( $new_instance['title'] ) : '';
-		$instance['attachment_id']  = ! empty( $new_instance['attachment_id'] ) ? absint( $new_instance['attachment_id'] ) : 0;
+		$instance['title']         = ! empty( $new_instance['title'] ) ? sanitize_text_field( $new_instance['title'] ) : '';
+		$instance['attachment_id'] = ! empty( $new_instance['attachment_id'] ) ? absint( $new_instance['attachment_id'] ) : 0;
+		$instance['url']           = ! empty( $new_instance['url'] ) ? sanitize_url( $new_instance['url'] ) : '';
  
         return $instance;
     }

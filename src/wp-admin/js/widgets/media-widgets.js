@@ -368,7 +368,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			'query[post_mime_type]': type,
 			'query[s]': search ? search.value : '',
 			'query[media_category_name]': mediaCatSelect ? mediaCatSelect.value : '',
-			'_ajax_nonce': document.getElementById( 'media_grid_nonce' ).value,
+			'_ajax_nonce': document.getElementById( 'media_grid_nonce' ) ? document.getElementById( 'media_grid_nonce' ).value : document.getElementById( '_wpnonce' ).value,
 		} );
 
 		// Make AJAX request
@@ -463,7 +463,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	} );
 
 	// Update "Link URL" field in Image widget
-	document.querySelectorAll( 'input[data-link-url="link_url"]' ).forEach( function( link ) {
+	document.querySelectorAll( 'input[data-link="link_url"]' ).forEach( function( link ) {
 		link.addEventListener( 'change', function( e ) {
 			var widget = e.target.closest( 'li' );
 			widget.querySelector( 'input[data-property="link_url"]' ).value = e.target.value;
@@ -513,7 +513,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 						dialog.querySelector( '#embed-image-settings-caption' ).value = caption;
 					}
 
-					linkType = widget.querySelector( 'input[data-link-type="link_type"]' ).value;
+					linkType = widget.querySelector( 'input[data-link="link_type"]' ).value;
 					dialog.querySelector( '#link-to' ).value = linkType;
 
 					options.forEach( function( option ) {
@@ -528,7 +528,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 						}
 					} );
 
-					linkToUrl = widget.querySelector( 'input[data-link-url="link_url"]' ).value;
+					linkToUrl = widget.querySelector( 'input[data-link="link_url"]' ).value;
 					dialog.querySelector( '#embed-image-settings-link-to-custom' ).value = linkToUrl;
 				}
 
@@ -774,7 +774,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				addedElement = document.createElement( 'img' );
 				addedElement.src = urlForInsertion;
 				addedElement.className = 'attachment-thumbnail';
-				widget.querySelector( 'input[data-property="alt_text"]' ).value = altText ? altText : '';
+				widget.querySelector( 'input[data-property="alt"]' ).value = altText ? altText : '';
 				widget.querySelector( 'input[data-property="caption"]' ).value = caption ? caption : '';
 				widget.querySelector( 'input[data-property="link_type"]' ).value = linkType ? linkType : 'none';
 				widget.querySelector( 'input[data-property="link_url"]' ).value = linkToUrl ? linkToUrl : '';
@@ -784,10 +784,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				widget.querySelector( '.attachment-media-view' ).remove();
 			}
 
-			preview.append( addedElement );
 			widget.querySelector( 'input[data-property="url"]' ).value = urlForInsertion;
-			document.getElementById( widgetID ).classList.add( 'widget-dirty' );
-			widget.dispatchEvent( new Event( 'change' ) );
 
 		// Add audio, video, or image from Media Library
 		} else {
@@ -823,7 +820,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				// Add image
 				} else {
 					addedElement = selectedItem.querySelector( 'img' );
-					addedElement.className = 'attachment-thumb';
+					addedElement.className = 'attachment-thumb';console.log(widget);
 				}
 
 				if ( widget.querySelector( '.attachment-media-view' ) != null ) {
@@ -831,21 +828,22 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				}
 
 				// Add values to widget-content fields
-				if ( widgetType === 'media_audio' || widgetType === 'media_video' ) {					
-					widget.querySelector( 'input[data-property="attachment_id"]' ).value = selectedItem.id.replace( 'media-', '' );
-				} else if ( widgetType === 'media_image' || widgetType === 'media_gallery' ) {
-					widget.querySelector( 'input[data-property="attachment_id"]' ).value = selectedItem.id.replace( 'media-', '' );
+				widget.querySelector( 'input[data-property="attachment_id"]' ).value = selectedItem.id.replace( 'media-', '' );
+				widget.querySelector( 'input[data-property="url"]' ).value = selectedItem.dataset.url;
+				if ( widgetType === 'media_image' || widgetType === 'media_gallery' ) {
 					widget.querySelector( 'input[data-property="size"]' ).value = modalSidebar.querySelector( '.size' ).value;
 					widget.querySelector( 'input[data-property="link_type"]' ).value = modalSidebar.querySelector( '.link-to' ).value;
 					widget.querySelector( 'input[data-property="link_url"]' ).value = modalSidebar.querySelector( '.link-to-custom' ).value;
 					widget.querySelector( 'input[data-property="caption"]' ).value = modalSidebar.querySelector( '#attachment-details-two-column-caption' ).textContent;
-					widget.querySelector( 'input[data-property="alt_text"]' ).value = modalSidebar.querySelector( '#attachment-details-two-column-alt-text' ).textContent;
+					widget.querySelector( 'input[data-property="alt"]' ).value = modalSidebar.querySelector( '#attachment-details-two-column-alt-text' ).textContent;
 				}
-
-				preview.append( addedElement );
-				widget.dispatchEvent( new Event( 'change' ) );
 			} );
 		}
+
+		preview.append( addedElement );
+		widget.classList.add( 'widget-dirty' );
+		widget.dispatchEvent( new Event( 'change' ) );
+
 		closeButton.click();
 	} );
 

@@ -122,7 +122,7 @@ class WP_Widget_Media_Image extends WP_Widget {
 					if ( $url ) {
 						$image_html = '<img class="attachment-thumb size-thumb" src="' . esc_url( $url ) . '" alt="' . esc_attr( $alt ) . '">';
 					} elseif ( $attachment_id ) {
-						$raw_image = wp_get_attachment_image( $attachment_id, 'thumb', false, array( 'alt' => $alt ) );
+						$raw_image = wp_get_attachment_image( $attachment_id, $size, false, array( 'alt' => $alt ) );
 						$image_html = preg_replace( '~(height|width)="\d*"\s~', '', $raw_image );
 					}
 
@@ -164,17 +164,15 @@ class WP_Widget_Media_Image extends WP_Widget {
 				?>
 
 			</fieldset>
-
-			<div class="widget-content">
-				<input id="<?php echo $this->get_field_id( 'attachment_id' ); ?>" name="<?php echo $this->get_field_name( 'attachment_id' ); ?>" class="widefat" type="hidden" data-property="attachment_id" value="<?php echo esc_attr( $attachment_id ); ?>">
-				<input id="<?php echo $this->get_field_id('size'); ?>" name="<?php echo $this->get_field_name( 'size' ); ?>" class="widefat" type="hidden" data-property="size">
-				<input id="<?php echo $this->get_field_id( 'link_type' ); ?>" name="<?php echo $this->get_field_name( 'link_type' ); ?>" class="widefat" type="hidden" data-property="link_type">
-				<input id="<?php echo $this->get_field_id( 'link_url' ); ?>" name="<?php echo $this->get_field_name( 'link_url' ); ?>" class="widefat" type="hidden" data-property="link_url">
-				<input id="<?php echo $this->get_field_id( 'caption' ); ?>" name="<?php echo $this->get_field_name( 'caption' ); ?>" class="widefat" type="hidden" data-property="caption">
-				<input id="<?php echo $this->get_field_id( 'alt' ); ?>" name="<?php echo $this->get_field_name( 'alt' ); ?>" type="hidden" class="widefat" data-property="alt">
-				<input id="<?php echo $this->get_field_id( 'url' ); ?>" name="<?php echo $this->get_field_name( 'url' ); ?>" type="hidden" class="widefat" data-property="url">
-			</div>
 		</div>
+
+		<input id="<?php echo $this->get_field_id( 'attachment_id' ); ?>" name="<?php echo $this->get_field_name( 'attachment_id' ); ?>" class="widefat" type="hidden" data-property="attachment_id" value="<?php echo esc_attr( $attachment_id ); ?>">
+		<input id="<?php echo $this->get_field_id('size'); ?>" name="<?php echo $this->get_field_name( 'size' ); ?>" class="widefat" type="hidden" data-property="size">
+		<input id="<?php echo $this->get_field_id( 'link_type' ); ?>" name="<?php echo $this->get_field_name( 'link_type' ); ?>" class="widefat" type="hidden" data-property="link_type">
+		<input id="<?php echo $this->get_field_id( 'link_url' ); ?>" name="<?php echo $this->get_field_name( 'link_url' ); ?>" class="widefat" type="hidden" data-property="link_url">
+		<input id="<?php echo $this->get_field_id( 'caption' ); ?>" name="<?php echo $this->get_field_name( 'caption' ); ?>" class="widefat" type="hidden" data-property="caption">
+		<input id="<?php echo $this->get_field_id( 'alt' ); ?>" name="<?php echo $this->get_field_name( 'alt' ); ?>" type="hidden" class="widefat" data-property="alt">
+		<input id="<?php echo $this->get_field_id( 'url' ); ?>" name="<?php echo $this->get_field_name( 'url' ); ?>" type="hidden" class="widefat" data-property="url">
 
 		<?php
 	}

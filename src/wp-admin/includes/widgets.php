@@ -196,6 +196,11 @@ function wp_widget_control( $sidebar_args ) {
 	$before_widget_content = isset( $sidebar_args['before_widget_content'] ) ? $sidebar_args['before_widget_content'] : '<div class="widget-content">';
 	$after_widget_content  = isset( $sidebar_args['after_widget_content'] ) ? $sidebar_args['after_widget_content'] : '</div>';
 
+	$media_widgets = array( 'media_image', 'media_gallery', 'media_audio', 'media_video' );
+	if ( in_array( $id_base, $media_widgets, true ) ) {
+		$before_widget_content = $after_widget_content = '';
+	}
+
 	$query_arg = array( 'editwidget' => $widget['id'] );
 	if ( $add_new ) {
 		$query_arg['addnew'] = 1;

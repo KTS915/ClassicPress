@@ -86,7 +86,7 @@ summary.widget-title::-webkit-details-marker {
 	display: inline-block;
 }
 
-.wp-core-ui .widget-content fieldset {
+.wp-core-ui .widget-inside fieldset {
 	margin: 1em 0;
 }
 

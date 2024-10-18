@@ -258,6 +258,15 @@ do_action( 'customize_controls_head' );
 			</div>
 		</div>
 
+		<?php
+		/**
+		 * Renders the modal for adding media to widgets
+		 *
+		 * @since CP-2.3.0
+		 */
+		echo cp_render_widget_modal();
+		?>
+
 		<div id="customize-footer-actions" class="wp-full-overlay-footer">
 			<button type="button" class="collapse-sidebar button" aria-expanded="true" aria-label="<?php echo esc_attr_x( 'Hide Controls', 'label for hide controls button without length constraints' ); ?>">
 				<span class="collapse-sidebar-arrow"></span>

@@ -2023,6 +2023,7 @@ function wp_render_widget_control( $id ) {
  * @return string
  */
 function cp_render_widget_modal() {
+	global $pagenow;
 
 	// Get the maximum upload size.
 	$max_upload_size = wp_max_upload_size();
@@ -2050,6 +2051,13 @@ function cp_render_widget_modal() {
 	$total_pages = (int) $attachments->max_num_pages;
 	$prev_page   = ( $paged === 1 ) ? $paged : $paged - 1;
 	$next_page   = ( $paged === $total_pages ) ? $paged : $paged + 1;
+
+	$upload = 'upload.php';
+	if ( $pagenow === 'widgets.php' ) {
+		$upload = 'widgets.php';
+	} elseif ( is_customize_preview() ) {
+		$upload = 'customize.php';
+	}
 
 	ob_start();
 	?>
@@ -2138,7 +2146,7 @@ function cp_render_widget_modal() {
 
 										</span>
 										<span class="pagination-links">						
-											<a class="first-page button" href="<?php echo admin_url( '/upload.php?paged=1' ); ?>"
+											<a class="first-page button" href="<?php echo admin_url( '/' . $upload . '?paged=1' ); ?>"
 												<?php
 												if ( $paged === 1 ) {
 													echo 'disabled inert';
@@ -2147,7 +2155,7 @@ function cp_render_widget_modal() {
 											>
 												<span class="screen-reader-text"><?php esc_html_e( 'First page' ); ?></span><span aria-hidden="true">«</span>
 											</a>
-											<a class="prev-page button" href="<?php echo admin_url( '/upload.php?paged=' . $prev_page ); ?>"
+											<a class="prev-page button" href="<?php echo admin_url( '/' . $upload . '?paged=' . $prev_page ); ?>"
 												<?php
 												if ( $paged === 1 ) {
 													echo 'disabled inert';
@@ -2161,7 +2169,7 @@ function cp_render_widget_modal() {
 												<input class="current-page" id="current-page-selector" type="text" name="paged" value="<?php echo esc_attr( $paged ); ?>" size="4" aria-describedby="table-paging">
 												<span class="tablenav-paging-text"> <?php esc_html_e( 'of' ); ?> <span class="total-pages"><?php echo esc_html( $total_pages ); ?></span></span>
 											</span>
-											<a class="next-page button" href="<?php echo admin_url( '/upload.php?paged=' . $next_page ); ?>"
+											<a class="next-page button" href="<?php echo admin_url( '/' . $upload . '?paged=' . $next_page ); ?>"
 												<?php
 												if ( $paged === $next_page ) {
 													echo 'disabled inert';
@@ -2170,7 +2178,7 @@ function cp_render_widget_modal() {
 											>
 												<span class="screen-reader-text"><?php esc_html_e( 'Next page' ); ?></span><span aria-hidden="true">›</span>
 											</a>
-											<a class="last-page button" href="<?php echo admin_url( '/upload.php?paged=' . $total_pages ); ?>"
+											<a class="last-page button" href="<?php echo admin_url( '/' . $upload . '?paged=' . $total_pages ); ?>"
 												<?php
 												if ( $paged === $next_page ) {
 													echo 'disabled inert';

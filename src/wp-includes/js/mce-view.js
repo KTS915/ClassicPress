@@ -823,7 +823,6 @@
 
 	gallery = _.extend( {}, base, {
 		state: [ 'gallery-edit' ],
-		template: media.template( 'editor-gallery' ),
 
 		initialize: function() {
 			var attachments = media.gallery.attachments( this.shortcode, media.view.settings.post.id ),
@@ -846,11 +845,58 @@
 					}
 				} );
 
-				self.render( self.template( {
-					verifyHTML: verifyHTML,
-					attachments: attachments,
-					columns: attrs.columns ? parseInt( attrs.columns, 10 ) : media.galleryDefaults.columns
-				} ) );
+				var columns = attrs.columns ? parseInt( attrs.columns, 10 ) : media.galleryDefaults.columns,
+					container = document.createElement( 'div' );
+
+				if ( attachments.length ) {
+					var gallery = document.createElement( 'div' );
+					gallery.className = 'gallery gallery-columns-' + columns;
+
+					_.each( attachments, function( attachment, index ) {
+						var dl = document.createElement( 'dl' );
+						dl.className = 'gallery-item';
+
+						var dt = document.createElement( 'dt' );
+						dt.className = 'gallery-icon';
+
+						var img = document.createElement( 'img' );
+						if ( attachment.thumbnail ) {
+							img.src = attachment.thumbnail.url;
+							img.width = attachment.thumbnail.width;
+							img.height = attachment.thumbnail.height;
+						} else {
+							img.src = attachment.url;
+						}
+						img.alt = attachment.alt || '';
+						dt.appendChild( img );
+						dl.appendChild( dt );
+
+						if ( attachment.caption ) {
+							var dd = document.createElement( 'dd' );
+							dd.className = 'wp-caption-text gallery-caption';
+							dd.innerHTML = verifyHTML( attachment.caption );
+							dl.appendChild( dd );
+						}
+
+						gallery.appendChild( dl );
+
+						if ( index % columns === columns - 1 ) {
+							var br = document.createElement( 'br' );
+							br.style.clear = 'both';
+							gallery.appendChild( br );
+						}
+					} );
+
+					container.appendChild( gallery );
+				} else {
+					var error = document.createElement( 'div' );
+					error.className = 'wpview-error';
+					error.innerHTML = '<div class="dashicons dashicons-format-gallery"></div><p>' +
+						window.wp.i18n.__( 'No items found.' ) + '</p>';
+					container.appendChild( error );
+				}
+
+				self.render( container );
 			} )
 			.fail( function( jqXHR, textStatus ) {
 				self.setError( textStatus );

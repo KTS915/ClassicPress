@@ -1229,6 +1229,30 @@ function wp_default_scripts( $scripts ) {
 	$scripts->add( 'media-views', "/wp-includes/js/media-views$suffix.js", array( 'utils', 'media-models', 'wp-plupload', 'sortable-js', 'wp-mediaelement', 'wp-api-request', 'wp-a11y' ), false, 1 );
 	$scripts->set_translations( 'media-views' );
 
+	$scripts->add( 'media-manager', "/wp-includes/js/media-manager$suffix.js", array( 'utils', 'wp-plupload', 'sortable-js', 'wp-mediaelement', 'wp-api-request', 'wp-a11y' ), false, 1 );
+	did_action( 'init' ) && $scripts->localize(
+		'media-manager',
+		'cpMediaManagerL10n',
+		array(
+			'dimensions'            => __( '%1$s by %2$s pixels' ),
+			'suggestedDimensions'   => __( 'Suggested image dimensions: %1$s by %2$s pixels.' ),
+			'captionLabel'          => __( 'Caption' ),
+			'captionPlaceholder'    => __( 'Caption…' ),
+			'videoTitleLabel'       => __( 'Video title' ),
+			'videoTitlePlaceholder' => __( 'Video title…' ),
+			'audioTitleLabel'       => __( 'Audio title' ),
+			'audioTitlePlaceholder' => __( 'Audio title…' ),
+			'mediaTitleLabel'       => __( 'Media title' ),
+			'mediaTitlePlaceholder' => __( 'Media title…' ),
+			'embedOrLink'           => __( 'Embed or Link' ),
+			'linkTo'                => __( 'Link To' ),
+			'linkToMediaFile'       => __( 'Link to Media File' ),
+			'mediaFile'             => __( 'Media File' ),
+			'linkToAttachmentPage'  => __( 'Link to Attachment Page' ),
+			'attachmentPage'        => __( 'Attachment Page' ),
+		)
+	);
+
 	$scripts->add( 'media-editor', "/wp-includes/js/media-editor$suffix.js", array( 'shortcode', 'media-views' ), false, 1 );
 	$scripts->set_translations( 'media-editor' );
 	$scripts->add( 'media-audiovideo', "/wp-includes/js/media-audiovideo$suffix.js", array( 'media-editor' ), false, 1 );

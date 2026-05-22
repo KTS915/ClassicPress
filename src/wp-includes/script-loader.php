@@ -1229,7 +1229,7 @@ function wp_default_scripts( $scripts ) {
 	$scripts->add( 'media-views', "/wp-includes/js/media-views$suffix.js", array( 'utils', 'media-models', 'wp-plupload', 'sortable-js', 'wp-mediaelement', 'wp-api-request', 'wp-a11y' ), false, 1 );
 	$scripts->set_translations( 'media-views' );
 
-	$scripts->add( 'media-manager', "/wp-includes/js/media-manager$suffix.js", array( 'utils', 'wp-plupload', 'sortable-js', 'wp-mediaelement', 'wp-api-request', 'wp-a11y' ), false, 1 );
+	$scripts->add( 'media-manager', "/wp-includes/js/media-manager$suffix.js", array( 'utils', 'sortable-js', 'wp-mediaelement', 'wp-api-request', 'wp-a11y' ), false, 1 );
 	did_action( 'init' ) && $scripts->localize(
 		'media-manager',
 		'cpMediaManagerL10n',

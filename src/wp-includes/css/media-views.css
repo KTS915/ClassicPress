@@ -202,20 +202,9 @@
 	z-index: 560000;
 }
 
-.media-modal-backdrop {
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	min-height: 360px;
+.media-modal::backdrop {
 	background: #000;
 	opacity: 0.7;
-	z-index: 159900;
-}
-
-.wp-customizer .media-modal-backdrop {
-	z-index: 559900;
 }
 
 .media-modal-close {

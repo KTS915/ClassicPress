@@ -170,7 +170,7 @@ function wp_print_media_templates() {
 	?>
 
 	<?php // Template for the media frame: used both in the media grid and in the media modal. ?>
-	<script type="text/html" id="tmpl-media-frame">
+	<template id="tmpl-media-frame">
 		<div class="media-frame-title" id="media-frame-title"></div>
 		<h2 class="media-frame-menu-heading"><?php _ex( 'Actions', 'media modal menu actions' ); ?></h2>
 		<button type="button" class="button button-link media-frame-menu-toggle" aria-expanded="false">
@@ -190,10 +190,10 @@ function wp_print_media_templates() {
 		</h2>
 		<div class="media-frame-toolbar"></div>
 		<div class="media-frame-uploader"></div>
-	</script>
+	</template>
 
 	<?php // Template for the media modal. ?>
-	<script type="text/html" id="tmpl-media-modal">
+	<template id="tmpl-media-modal">
 		<div tabindex="0" class="<?php echo $class; ?>" role="dialog" aria-labelledby="media-frame-title">
 			<# if ( data.hasCloseButton ) { #>
 				<button type="button" class="media-modal-close"><span class="media-modal-icon"><span class="screen-reader-text">
@@ -206,24 +206,24 @@ function wp_print_media_templates() {
 			<div class="media-modal-content" role="document"></div>
 		</div>
 		<div class="media-modal-backdrop"></div>
-	</script>
+	</template>
 
 	<?php // Template for the window uploader, used for example in the media grid. ?>
-	<script type="text/html" id="tmpl-uploader-window">
+	<template id="tmpl-uploader-window">
 		<div class="uploader-window-content">
 			<div class="uploader-editor-title"><?php _e( 'Drop files to upload' ); ?></div>
 		</div>
-	</script>
+	</template>
 
 	<?php // Template for the editor uploader. ?>
-	<script type="text/html" id="tmpl-uploader-editor">
+	<template id="tmpl-uploader-editor">
 		<div class="uploader-editor-content">
 			<div class="uploader-editor-title"><?php _e( 'Drop files to upload' ); ?></div>
 		</div>
-	</script>
+	</template>
 
 	<?php // Template for the inline uploader, used for example in the Media Library admin page - Add New. ?>
-	<script type="text/html" id="tmpl-uploader-inline">
+	<template id="tmpl-uploader-inline">
 		<# var messageClass = data.message ? 'has-upload-message' : 'no-upload-message'; #>
 		<# if ( data.canClose ) { #>
 		<button class="close dashicons dashicons-no"><span class="screen-reader-text">
@@ -332,10 +332,10 @@ function wp_print_media_templates() {
 			</div>
 		<?php endif; ?>
 		</div>
-	</script>
+	</template>
 
 	<?php // Template for the view switchers, used for example in the Media Grid. ?>
-	<script type="text/html" id="tmpl-media-library-view-switcher">
+	<template id="tmpl-media-library-view-switcher">
 		<a href="<?php echo esc_url( add_query_arg( 'mode', 'list', admin_url( 'upload.php' ) ) ); ?>" class="view-list">
 			<span class="screen-reader-text">
 				<?php
@@ -352,10 +352,10 @@ function wp_print_media_templates() {
 				?>
 			</span>
 		</a>
-	</script>
+	</template>
 
 	<?php // Template for the uploading status UI. ?>
-	<script type="text/html" id="tmpl-uploader-status">
+	<template id="tmpl-uploader-status">
 		<h2><?php _e( 'Uploading' ); ?></h2>
 
 		<div class="media-progress-bar"><div></div></div>
@@ -368,16 +368,16 @@ function wp_print_media_templates() {
 		</div>
 		<div class="upload-errors"></div>
 		<button type="button" class="button upload-dismiss-errors"><?php _e( 'Dismiss errors' ); ?></button>
-	</script>
+	</template>
 
 	<?php // Template for the uploading status errors. ?>
-	<script type="text/html" id="tmpl-uploader-status-error">
+	<template id="tmpl-uploader-status-error">
 		<span class="upload-error-filename">{{{ data.filename }}}</span>
 		<span class="upload-error-message">{{ data.message }}</span>
-	</script>
+	</template>
 
 	<?php // Template for the Attachment Details layout in the media browser. ?>
-	<script type="text/html" id="tmpl-edit-attachment-frame">
+	<template id="tmpl-edit-attachment-frame">
 		<div class="edit-media-header">
 			<button class="left dashicons"<# if ( ! data.hasPrevious ) { #> disabled<# } #>><span class="screen-reader-text"><?php /* translators: Hidden accessibility text. */ _e( 'Edit previous media item' ); ?></span></button>
 			<button class="right dashicons"<# if ( ! data.hasNext ) { #> disabled<# } #>><span class="screen-reader-text"><?php /* translators: Hidden accessibility text. */ _e( 'Edit next media item' ); ?></span></button>
@@ -385,10 +385,10 @@ function wp_print_media_templates() {
 		</div>
 		<div class="media-frame-title"></div>
 		<div class="media-frame-content"></div>
-	</script>
+	</template>
 
 	<?php // Template for the Attachment Details two columns layout. ?>
-	<script type="text/html" id="tmpl-attachment-details-two-column">
+	<template id="tmpl-attachment-details-two-column">
 		<div class="attachment-media-view {{ data.orientation }}">
 			<h2 class="screen-reader-text"><?php /* translators: Hidden accessibility text. */ _e( 'Attachment Preview' ); ?></h2>
 			<div class="thumbnail thumbnail-{{ data.type }}">
@@ -594,10 +594,10 @@ function wp_print_media_templates() {
 				<# } #>
 			</div>
 		</div>
-	</script>
+	</template>
 
 	<?php // Template for the Attachment "thumbnails" in the Media Grid. ?>
-	<script type="text/html" id="tmpl-attachment">
+	<template id="tmpl-attachment">
 		<div class="attachment-preview js--select-attachment type-{{ data.type }} subtype-{{ data.subtype }} {{ data.orientation }}">
 			<div class="thumbnail">
 				<# if ( data.uploading ) { #>
@@ -659,10 +659,10 @@ function wp_print_media_templates() {
 					<# } #> {{ maybeReadOnly }}>
 			<# }
 		} #>
-	</script>
+	</template>
 
 	<?php // Template for the Attachment details, used for example in the sidebar. ?>
-	<script type="text/html" id="tmpl-attachment-details">
+	<template id="tmpl-attachment-details">
 		<h2>
 			<?php _e( 'Attachment Details' ); ?>
 			<span class="settings-save-status" role="status">
@@ -806,10 +806,10 @@ function wp_print_media_templates() {
 				<span class="success hidden" aria-hidden="true"><?php _e( 'Copied!' ); ?></span>
 			</div>
 		</span>
-	</script>
+	</template>
 
 	<?php // Template for the Selection status bar. ?>
-	<script type="text/html" id="tmpl-media-selection">
+	<template id="tmpl-media-selection">
 		<div class="selection-info">
 			<span class="count"></span>
 			<# if ( data.editable ) { #>
@@ -820,10 +820,10 @@ function wp_print_media_templates() {
 			<# } #>
 		</div>
 		<div class="selection-view"></div>
-	</script>
+	</template>
 
 	<?php // Template for the Attachment display settings, used for example in the sidebar. ?>
-	<script type="text/html" id="tmpl-attachment-display-settings">
+	<template id="tmpl-attachment-display-settings">
 		<h2><?php _e( 'Attachment Display Settings' ); ?></h2>
 
 		<# if ( 'image' === data.type ) { #>
@@ -934,10 +934,10 @@ function wp_print_media_templates() {
 				</select>
 			</span>
 		<# } #>
-	</script>
+	</template>
 
 	<?php // Template for the Gallery settings, used for example in the sidebar. ?>
-	<script type="text/html" id="tmpl-gallery-settings">
+	<template id="tmpl-gallery-settings">
 		<h2><?php _e( 'Gallery Settings' ); ?></h2>
 
 		<span class="setting">
@@ -1009,10 +1009,10 @@ function wp_print_media_templates() {
 				<?php endforeach; ?>
 			</select>
 		</span>
-	</script>
+	</template>
 
 	<?php // Template for the Playlists settings, used for example in the sidebar. ?>
-	<script type="text/html" id="tmpl-playlist-settings">
+	<template id="tmpl-playlist-settings">
 		<h2><?php _e( 'Playlist Settings' ); ?></h2>
 
 		<# var emptyModel = _.isEmpty( data.model ),
@@ -1050,10 +1050,10 @@ function wp_print_media_templates() {
 				<?php _e( 'Show Images' ); ?>
 			</label>
 		</span>
-	</script>
+	</template>
 
 	<?php // Template for the "Insert from URL" layout. ?>
-	<script type="text/html" id="tmpl-embed-link-settings">
+	<template id="tmpl-embed-link-settings">
 		<span class="setting link-text">
 			<label for="embed-link-settings-link-text" class="name"><?php _e( 'Link Text' ); ?></label>
 			<input type="text" id="embed-link-settings-link-text" class="alignment" data-setting="linkText">
@@ -1061,10 +1061,10 @@ function wp_print_media_templates() {
 		<div class="embed-container" style="display: none;">
 			<div class="embed-preview"></div>
 		</div>
-	</script>
+	</template>
 
 	<?php // Template for the "Insert from URL" image preview and details. ?>
-	<script type="text/html" id="tmpl-embed-image-settings">
+	<template id="tmpl-embed-image-settings">
 		<div class="wp-clearfix">
 			<div class="thumbnail">
 				<img src="{{ data.model.url }}" draggable="false" alt="">
@@ -1127,10 +1127,10 @@ function wp_print_media_templates() {
 				<input type="text" id="embed-image-settings-link-to-custom" class="link-to-custom" data-setting="linkUrl">
 			</span>
 		</fieldset>
-	</script>
+	</template>
 
 	<?php // Template for the Image details, used for example in the editor. ?>
-	<script type="text/html" id="tmpl-image-details">
+	<template id="tmpl-image-details">
 		<div class="media-embed">
 			<div class="embed-media-settings">
 				<div class="column-settings">
@@ -1293,16 +1293,16 @@ function wp_print_media_templates() {
 				</div>
 			</div>
 		</div>
-	</script>
+	</template>
 
 	<?php // Template for the Image Editor layout. ?>
-	<script type="text/html" id="tmpl-image-editor">
+	<template id="tmpl-image-editor">
 		<div id="media-head-{{ data.id }}"></div>
 		<div id="image-editor-{{ data.id }}"></div>
-	</script>
+	</template>
 
 	<?php // Template for an embedded Audio details. ?>
-	<script type="text/html" id="tmpl-audio-details">
+	<template id="tmpl-audio-details">
 		<# var ext, html5types = {
 			mp3: wp.media.view.settings.embedMimes.mp3,
 			ogg: wp.media.view.settings.embedMimes.ogg
@@ -1379,10 +1379,10 @@ function wp_print_media_templates() {
 				</span>
 			</div>
 		</div>
-	</script>
+	</template>
 
 	<?php // Template for an embedded Video details. ?>
-	<script type="text/html" id="tmpl-video-details">
+	<template type="text/html" id="tmpl-video-details">
 		<# var ext, html5types = {
 			mp4: wp.media.view.settings.embedMimes.mp4,
 			ogv: wp.media.view.settings.embedMimes.ogv,
@@ -1507,10 +1507,10 @@ function wp_print_media_templates() {
 				</span>
 			</div>
 		</div>
-	</script>
+	</template>
 
 	<?php // Template for a Gallery within the editor. ?>
-	<script type="text/html" id="tmpl-editor-gallery">
+	<template id="tmpl-editor-gallery">
 		<# if ( data.attachments.length ) { #>
 			<div class="gallery gallery-columns-{{ data.columns }}">
 				<# _.each( data.attachments, function( attachment, index ) { #>
@@ -1538,16 +1538,16 @@ function wp_print_media_templates() {
 				<div class="dashicons dashicons-format-gallery"></div><p><?php _e( 'No items found.' ); ?></p>
 			</div>
 		<# } #>
-	</script>
+	</template>
 
 	<?php // Template for the Crop area layout, used for example in the Customizer. ?>
-	<script type="text/html" id="tmpl-crop-content">
+	<template id="tmpl-crop-content">
 		<img class="crop-image" src="{{ data.url }}" alt="<?php esc_attr_e( 'Image crop area preview. Requires mouse interaction.' ); ?>">
 		<div class="upload-errors"></div>
-	</script>
+	</template>
 
 	<?php // Template for the Site Icon preview, used for example in the Customizer. ?>
-	<script type="text/html" id="tmpl-site-icon-preview">
+	<template id="tmpl-site-icon-preview">
 		<h2><?php _e( 'Preview' ); ?></h2>
 		<strong aria-hidden="true"><?php _e( 'As a browser icon' ); ?></strong>
 		<div class="favicon-preview">
@@ -1563,12 +1563,12 @@ function wp_print_media_templates() {
 		<div class="app-icon-preview">
 			<img id="preview-app-icon" src="{{ data.url }}" alt="<?php esc_attr_e( 'Preview as an app icon' ); ?>">
 		</div>
-	</script>
+	</template>
 
 	<?php
 
 	/**
-	 * Fires when the custom Backbone media templates are printed.
+	 * Fires when the custom media templates are printed.
 	 *
 	 * @since 3.5.0
 	 */

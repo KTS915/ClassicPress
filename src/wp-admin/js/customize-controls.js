@@ -51,7 +51,8 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		autosaveSaving = false,
 		lastAutosavePayload = '',
 		lastSavedPayload = '',
-		autosaveErrorNotice = null;
+		autosaveErrorNotice = null,
+		autosaveNoticeDismissed = false;
 
 	const colorSchemeInputs = form.querySelectorAll( 'input[name="_customize-radio-colorscheme"]' ),
 		hueControl = form.querySelector( 'li[data-setting-id="colorscheme_hue"]' );
@@ -174,6 +175,9 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	}
 
 	document.getElementById( 'customize-preview-loading' ).classList.add( 'hidden' );
+	applyLockState();
+	startLockPolling();
+	maybeShowAutosaveNotice();
 
 	// Set scheduled time for future publication
 	if ( changesetStatus === 'future' && window._wpCustomizeChangesetDate ) {
@@ -553,6 +557,15 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	}
 
 	/**
+	 * Whether an autosave revision exists.
+	 *
+	 * @return {boolean}
+	 */
+	function hasAutosaveRevision() {
+		return !! ( lockSettings?.changeset?.latestAutoDraftUuid || lockSettings?.changeset?.hasAutosaveRevision );
+	}
+
+	/**
 	 * Create normalized changeset payload from updatedControls.
 	 *
 	 * Autosave deliberately skips nav menu settings because your current
@@ -823,10 +836,137 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		}
 	}
 
+	function renderAutosaveNotice() {
+		var existingNotice, wrapper, title, text, actions, dismissButton;
+
+		if ( ! hasAutosaveRevision() ) {
+			return;
+		}
+
+		existingNotice = document.getElementById( 'customize-autosave-notice' );
+		if ( existingNotice ) {
+			return;
+		}
+
+		wrapper = document.createElement( 'div' );
+		wrapper.id = 'customize-autosave-notice';
+		wrapper.className = 'notice notice-warning customize-autosave-notice is-dismissible';
+
+		title = document.createElement( 'p' );
+		title.innerHTML = '<strong>' + wp.i18n.__( 'A more recent autosave exists.', 'classicpress' ) + '</strong>';
+
+		text = document.createElement( 'p' );
+		text.textContent = wp.i18n.__( 'You can continue with the restored autosave, or dismiss this notice to discard that autosave.', 'classicpress' );
+
+		actions = document.createElement( 'p' );
+		actions.className = 'customize-autosave-notice-actions';
+
+		dismissButton = document.createElement( 'button' );
+		dismissButton.type = 'button';
+		dismissButton.className = 'notice-dismiss';
+		dismissButton.setAttribute( 'aria-label', wp.i18n.__( 'Dismiss this notice.', 'classicpress' ) );
+		dismissButton.addEventListener( 'click', function() {
+			dismissAutosaveNotice( false );
+		} );
+
+		wrapper.appendChild( dismissButton );
+		wrapper.appendChild( title );
+		wrapper.appendChild( text );
+		wrapper.appendChild( actions );
+
+		document.getElementById( 'customize-info' )?.insertAdjacentElement( 'afterend', wrapper );
+	}
+
+	function dismissAutosaveNotice( implicit ) {
+		var notice = document.getElementById( 'customize-autosave-notice' ),
+			nonce = lockSettings?.nonce?.dismiss_autosave_or_lock,
+			currentUuid = getCurrentChangesetUuid(),
+			data;
+
+		if ( autosaveNoticeDismissed ) {
+			if ( notice ) {
+				notice.remove();
+			}
+			return Promise.resolve();
+		}
+
+		autosaveNoticeDismissed = true;
+
+		if ( notice ) {
+			notice.remove();
+		}
+
+		if ( ! nonce ) {
+			return Promise.resolve();
+		}
+
+		data = new URLSearchParams();
+		data.append( 'action', 'customize_dismiss_autosave_or_lock' );
+		data.append( 'nonce', nonce );
+		data.append( 'dismiss_autosave', 'true' );
+		data.append( 'dismiss_lock', 'false' );
+
+		if ( currentUuid ) {
+			data.append( 'customize_changeset_uuid', currentUuid );
+		}
+
+		if ( lockSettings?.nonce?.preview ) {
+			data.append( 'customize_preview_nonce', lockSettings.nonce.preview );
+		}
+
+		return fetch( ajaxurl, {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+			},
+			body: data.toString()
+		} )
+		.then( function( response ) {
+			return response.json().then( function( result ) {
+				return {
+					ok: response.ok,
+					status: response.status,
+					result: result
+				};
+			} );
+		} )
+		.then( function( payload ) {
+			if ( ! payload.ok || ! payload.result.success ) {
+				console.error(
+					implicit ?
+						'Implicit autosave dismissal failed:' :
+						'Autosave dismissal failed:',
+					payload
+				);
+			} else if ( lockSettings?.changeset ) {
+				lockSettings.changeset.hasAutosaveRevision = false;
+				lockSettings.changeset.latestAutoDraftUuid = null;
+			}
+		} )
+		.catch( function( error ) {
+			console.error(
+				implicit ?
+					'Implicit autosave dismissal failed.' :
+					'Autosave dismissal failed.',
+				error
+			);
+		} );
+	}
+
+	function maybeShowAutosaveNotice() {
+		if ( hasAutosaveRevision() ) {
+			renderAutosaveNotice();
+		}
+	}
+
 	/**
 	 * Prepare changed object for publication.
 	 */
 	function inputChanged( input, settingId ) {
+		if ( hasAutosaveRevision() && ! autosaveNoticeDismissed ) {
+			dismissAutosaveNotice( true );
+		}
 		_updatedControlsWatcher[ settingId ] = input.value.trim();
 		activatePublishButton();
 		scheduleAutosave();

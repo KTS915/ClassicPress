@@ -43,7 +43,15 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		hash = window.location.hash.replace( '#', '' ),
 		section = document.getElementById( 'sub-accordion-section-custom_css' ),
 		discardingChangeset = false,
-		changesetStatus = window._wpCustomizeChangesetStatus || 'publish';
+		changesetStatus = window._wpCustomizeChangesetStatus || 'publish',
+		autosaveTimer = null,
+		autosaveRequest = null,
+		autosaveDelay = 8000,
+		autosaveCreatingInitial = false,
+		autosaveSaving = false,
+		lastAutosavePayload = '',
+		lastSavedPayload = '',
+		autosaveErrorNotice = null;
 
 	const colorSchemeInputs = form.querySelectorAll( 'input[name="_customize-radio-colorscheme"]' ),
 		hueControl = form.querySelector( 'li[data-setting-id="colorscheme_hue"]' );
@@ -525,11 +533,303 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	}
 
 	/**
+	 * Get nonce field safely.
+	 *
+	 * @param {string} id Field ID.
+	 * @return {string}
+	 */
+	function getFieldValue( id ) {
+		var el = document.getElementById( id );
+		return el ? el.value : '';
+	}
+
+	/**
+	 * Whether the current session is locked by another user.
+	 *
+	 * @return {boolean}
+	 */
+	function isCustomizerLocked() {
+		return !! getChangesetLockUser();
+	}
+
+	/**
+	 * Create normalized changeset payload from updatedControls.
+	 *
+	 * Autosave deliberately skips nav menu settings because your current
+	 * explicit save flow has special handling for negative IDs, created menus,
+	 * and item remapping.
+	 *
+	 * @return {Object}
+	 */
+	function getAutosaveChanges() {
+		var submittedChanges = {};
+
+		Object.keys( updatedControls ).forEach( function( settingId ) {
+			var item = updatedControls[ settingId ];
+
+			if ( settingId.startsWith( 'nav_menu[' ) || settingId.startsWith( 'nav_menu_item[' ) || settingId.startsWith( 'nav_menu_locations[' ) || settingId === 'nav_menus_created_posts' ) {
+				return;
+			}
+
+			submittedChanges[ settingId ] = {
+				value: item || ''
+			};
+		} );
+
+		return submittedChanges;
+	}
+
+	/**
+	 * Whether there is anything autosaveable pending.
+	 *
+	 * @return {boolean}
+	 */
+	function hasAutosaveableChanges() {
+		return Object.keys( getAutosaveChanges() ).length > 0;
+	}
+
+	/**
+	 * Remove autosave error notice.
+	 *
+	 * @return {void}
+	 */
+	function clearAutosaveErrorNotice() {
+		if ( autosaveErrorNotice && autosaveErrorNotice.parentNode ) {
+			autosaveErrorNotice.parentNode.removeChild( autosaveErrorNotice );
+		}
+		autosaveErrorNotice = null;
+	}
+
+	/**
+	 * Render a lightweight autosave error notice.
+	 *
+	 * @param {string} message Message text.
+	 * @return {void}
+	 */
+	function renderAutosaveErrorNotice( message ) {
+		clearAutosaveErrorNotice();
+
+		autosaveErrorNotice = document.createElement( 'div' );
+		autosaveErrorNotice.className = 'notice notice-warning customize-autosave-notice';
+		autosaveErrorNotice.innerHTML = '<p>' + message + '</p>';
+
+		document.getElementById( 'customize-info' ).insertAdjacentElement( 'afterend', autosaveErrorNotice );
+	}
+
+	/**
+	 * Mark the timestamp of a successful autosave.
+	 *
+	 * @return {void}
+	 */
+	function markAutosaveSuccess() {
+		clearAutosaveErrorNotice();
+		lastSavedPayload = lastAutosavePayload;
+	}
+
+	/**
+	 * Build a FormData payload for save/autosave requests.
+	 *
+	 * @param {Object} submittedChanges Changeset data object.
+	 * @param {boolean} isAutosave Whether this is an autosave request.
+	 * @return {FormData}
+	 */
+	function buildSaveRequestData( submittedChanges, isAutosave ) {
+		var data = new FormData();
+
+		data.append( 'action', 'customize_save' );
+		data.append( 'nonce', getFieldValue( 'customizer_nonce' ) );
+		data.append( 'customize_theme', getFieldValue( 'theme_stylesheet' ) );
+		data.append( 'customize_changeset_uuid', getFieldValue( 'customize_changeset_uuid' ) );
+		data.append( 'customize_changeset_data', JSON.stringify( submittedChanges ) );
+
+		if ( isAutosave ) {
+			data.append( 'customize_changeset_autosave', '1' );
+		} else {
+			data.append( 'customize_changeset_status', changesetStatus );
+		}
+
+		return data;
+	}
+
+	/**
+	 * Perform a save request.
+	 *
+	 * @param {Object} submittedChanges Changeset data object.
+	 * @param {boolean} isAutosave Whether this is an autosave request.
+	 * @return {Promise<Object>}
+	 */
+	async function sendSaveRequest( submittedChanges, isAutosave ) {
+		var data = buildSaveRequestData( submittedChanges, isAutosave ),
+			response;
+
+		if ( autosaveRequest && isAutosave ) {
+			autosaveRequest.abort();
+		}
+
+		if ( isAutosave ) {
+			autosaveRequest = new AbortController();
+		}
+
+		response = await fetch( ajaxurl, {
+			method: 'POST',
+			body: data,
+			credentials: 'same-origin',
+			signal: isAutosave ? autosaveRequest.signal : undefined
+		} );
+
+		if ( ! response.ok ) {
+			throw new Error( response.status );
+		}
+
+		return response.json();
+	}
+
+	/**
+	 * Perform an initial ordinary save so later autosaves can become
+	 * revision autosaves instead of repeatedly updating the auto-draft.
+	 *
+	 * @return {Promise<boolean>}
+	 */
+	async function ensureInitialChangesetSaved() {
+		var submittedChanges, result;
+
+		if ( autosaveCreatingInitial ) {
+			return false;
+		}
+
+		submittedChanges = getAutosaveChanges();
+
+		if ( Object.keys( submittedChanges ).length < 1 ) {
+			return false;
+		}
+
+		autosaveCreatingInitial = true;
+
+		try {
+			result = await sendSaveRequest( submittedChanges, false );
+
+			if ( result && result.success ) {
+				if ( result.data.next_changeset_uuid ) {
+					document.getElementById( 'customize_changeset_uuid' ).value = result.data.next_changeset_uuid;
+
+					if ( lockSettings.changeset ) {
+						lockSettings.changeset.uuid = result.data.next_changeset_uuid;
+					}
+				}
+				lastSavedPayload = JSON.stringify( submittedChanges );
+				return true;
+			}
+		} catch ( err ) {
+			console.error( 'Initial autosave bootstrap failed:', err );
+		} finally {
+			autosaveCreatingInitial = false;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Run autosave if there are changes pending.
+	 *
+	 * @return {Promise<void>}
+	 */
+	async function runAutosave() {
+		var submittedChanges, result;
+
+		if (
+			autosaveSaving ||
+			autosaveCreatingInitial ||
+			window._customizePublishing ||
+			discardingChangeset ||
+			isCustomizerLocked()
+		) {
+			return;
+		}
+
+		submittedChanges = getAutosaveChanges();
+
+		if ( Object.keys( submittedChanges ).length < 1 ) {
+			return;
+		}
+
+		lastAutosavePayload = JSON.stringify( submittedChanges );
+
+		if ( lastAutosavePayload === lastSavedPayload ) {
+			return;
+		}
+
+		autosaveSaving = true;
+
+		try {
+			await ensureInitialChangesetSaved();
+
+			result = await sendSaveRequest( submittedChanges, true );
+
+			if ( result && result.success ) {
+				if ( result.data.next_changeset_uuid ) {
+					document.getElementById( 'customize_changeset_uuid' ).value = result.data.next_changeset_uuid;
+
+					if ( lockSettings.changeset ) {
+						lockSettings.changeset.uuid = result.data.next_changeset_uuid;
+					}
+				}
+				markAutosaveSuccess();
+			} else if ( result && result.data && result.data.setting_validities ) {
+				renderAutosaveErrorNotice( _wpCustomizeControlsL10n.saveBlockedError?.single || 'Autosave failed because one or more settings are invalid.' );
+			}
+		} catch ( err ) {
+			if ( err.name !== 'AbortError' ) {
+				console.error( 'Customizer autosave failed:', err );
+				renderAutosaveErrorNotice( _wpCustomizeControlsL10n.saveBlockedError?.single || 'Autosave failed.' );
+			}
+		} finally {
+			autosaveSaving = false;
+		}
+	}
+
+	/**
+	 * Debounce autosave scheduling.
+	 *
+	 * @return {void}
+	 */
+	function scheduleAutosave() {
+		if (
+			window._customizePublishing ||
+			discardingChangeset ||
+			isCustomizerLocked() ||
+			! hasAutosaveableChanges()
+		) {
+			return;
+		}
+
+		window.clearTimeout( autosaveTimer );
+		autosaveTimer = window.setTimeout( function() {
+			runAutosave();
+		}, autosaveDelay );
+	}
+
+	/**
+	 * Cancel pending autosave timer/request.
+	 *
+	 * @return {void}
+	 */
+	function cancelAutosave() {
+		window.clearTimeout( autosaveTimer );
+		autosaveTimer = null;
+
+		if ( autosaveRequest ) {
+			autosaveRequest.abort();
+			autosaveRequest = null;
+		}
+	}
+
+	/**
 	 * Prepare changed object for publication.
 	 */
 	function inputChanged( input, settingId ) {
 		_updatedControlsWatcher[ settingId ] = input.value.trim();
 		activatePublishButton();
+		scheduleAutosave();
 	}
 
 	inputs.forEach( function( input ) {
@@ -1661,6 +1961,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				};
 
 				activatePublishButton();
+				scheduleAutosave();
 				document.getElementById( 'sub-accordion-section-header_image ' ).querySelector( 'a' ).focus();
 			} else {
 				parent.previousElementSibling.querySelector( '.container' ).innerHTML = '';
@@ -1721,6 +2022,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		}
 		closeModal();
 		activatePublishButton();
+		scheduleAutosave();
 	}
 
 	/**
@@ -1767,6 +2069,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			_updatedControlsWatcher[ parent.closest( 'li' ).dataset.settingId ] = '';
 		}
 		activatePublishButton();
+		scheduleAutosave();
 	}
 
 	/* Enable choosing of panel on narrow screen */
@@ -1869,6 +2172,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 		// Prevent form submission via PHP
 		e.preventDefault();
+		cancelAutosave();
 
 		window._customizePublishing = true;
 
@@ -2140,6 +2444,9 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			Object.keys( updatedControls ).forEach( function( key ) {
 				delete updatedControls[ key ];
 			} );
+			lastAutosavePayload = '';
+			lastSavedPayload = '';
+			clearAutosaveErrorNotice();
 
 			// If the server rolled the changeset UUID, update it before next call
 			if ( newResult.data.next_changeset_uuid ) {
@@ -2253,6 +2560,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		if ( ! window.confirm( _wpCustomizeControlsL10n.trashConfirm ) ) {
 			return;
 		}
+		cancelAutosave();
 
 		formData = new FormData();
 		formData.append( 'action', 'customize_trash' );
@@ -2339,6 +2647,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				textarea.value = cm.getValue();
 				_updatedControlsWatcher[ settingId ] = textarea.value.trim();
 				activatePublishButton();
+				scheduleAutosave();
 			} );
 
 			observer = new MutationObserver( function( mutations ) {
@@ -2402,6 +2711,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 			// Enable Publish.
 			activatePublishButton();
+			scheduleAutosave();
 		}
 	} );
 

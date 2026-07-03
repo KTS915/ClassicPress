@@ -24,6 +24,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		isReducedMotion = reducedMotionMediaQuery.matches,
 		form = document.querySelector( 'form' ),
 		inputs = form.querySelectorAll( 'input, select, textarea' ),
+		listItems = form.querySelectorAll( 'li' ),
 		saveButton = form.querySelector( '#save' ),
 		publishSettings = form.querySelector( '#publish-settings' ),
 		publishSettingsPanel = document.getElementById( 'sub-accordion-section-publish_settings' ),
@@ -298,7 +299,12 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		wrapper.appendChild( actions );
 
 		setTimeout( function() {
-			document.getElementById( 'customize-info' ).insertAdjacentElement( 'afterend', wrapper );
+			for ( let i = 0, n = listItems.length; i < n; i++ ) {
+				if ( isVisible( listItems[i] ) ) {
+					listItems[i].insertAdjacentElement( 'afterend', wrapper );
+					return;
+				}
+			}
 		}, 0 );
 		lockNotice = wrapper;
 	}
@@ -423,7 +429,14 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				) +
 			'</p>';
 
-		document.getElementById( 'customize-info' ).insertAdjacentElement( 'afterend', notice );
+		setTimeout( function() {
+			for ( let i = 0, n = listItems.length; i < n; i++ ) {
+				if ( isVisible( listItems[i] ) ) {
+					listItems[i].insertAdjacentElement( 'afterend', notice );
+					return;
+				}
+			}
+		}, 0 );
 	}
 
 	function startLockPolling() {
@@ -626,7 +639,14 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		autosaveErrorNotice.className = 'notice notice-warning customize-autosave-notice';
 		autosaveErrorNotice.innerHTML = '<p>' + message + '</p>';
 
-		document.getElementById( 'customize-info' ).insertAdjacentElement( 'afterend', autosaveErrorNotice );
+		setTimeout( function() {
+			for ( let i = 0, n = listItems.length; i < n; i++ ) {
+				if ( isVisible( listItems[i] ) ) {
+					listItems[i].insertAdjacentElement( 'afterend', autosaveErrorNotice );
+					return;
+				}
+			}
+		}, 0 );
 	}
 
 	/**
@@ -874,7 +894,14 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		wrapper.appendChild( text );
 		wrapper.appendChild( actions );
 
-		document.getElementById( 'customize-info' )?.insertAdjacentElement( 'afterend', wrapper );
+		setTimeout( function() {
+			for ( let i = 0, n = listItems.length; i < n; i++ ) {
+				if ( isVisible( listItems[i] ) ) {
+					listItems[i].insertAdjacentElement( 'afterend', wrapper );
+					return;
+				}
+			}
+		}, 0 );
 	}
 
 	function dismissAutosaveNotice( implicit ) {

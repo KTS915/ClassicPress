@@ -597,7 +597,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			}
 
 			// Populate grid with new items
-			themesGrid.insertAdjacentHTML( 'beforeend', convertThemeLinksToButtons( result.data.html ) );
+			themesGrid.append( convertThemeLinksToButtons( result.data.html ) );
 			orgThemes = document.querySelectorAll( '.wp-org .themes li' );
 			orgThemes.forEach( function( theme ) {
 				theme.style.marginRight = '2%';
@@ -635,13 +635,15 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			button.type = 'button';
 
 			// Preserve contents.
-			button.innerHTML = link.innerHTML;
+			for ( const child of link.childNodes ) {
+				button.append( child.cloneNode( true ) );
+			}
 
 			// Replace <a> with <button>.
 			link.replaceWith( button );
 		} );
 
-		return template.innerHTML;
+		return template.content.cloneNode( true );
 	}
 
 	/**

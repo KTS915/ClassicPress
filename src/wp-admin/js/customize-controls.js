@@ -621,7 +621,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		const template = document.createElement( 'template' );
 		template.innerHTML = html;
 
-		template.content.querySelectorAll( '.theme-install' ).forEach( function( link ) {
+		template.content.querySelectorAll( 'a.theme-install' ).forEach( function( link ) {
 			const button = document.createElement( 'button' );
 
 			// Copy all attributes except href.

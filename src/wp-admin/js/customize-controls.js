@@ -50,6 +50,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	// Go direct to appropriate Customizer panel if its hash is specified in the URL
 	if ( hash === 'menu-to-edit' ) {
 		hash = 'sub-accordion-panel-nav_menus';
+		window.location.hash = encodeURIComponent( hash );
 	}
 
 	if ( ! hash ) {
@@ -141,7 +142,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	if ( queryParams.get( 'url' ) ) {
 		queryParams.delete( 'url' );
 		newUrl = window.location.pathname + ( queryParams.toString() ? '?' + queryParams.toString() : '' ) + ( hash ? '#' + hash : '' );
-		history.replaceState( null, '', newUrl );
+		history.replaceState( null, '', encodeURI( newUrl ) );
 	}
 
 	if ( queryParams.get( 'discarded' ) ) {
@@ -150,11 +151,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 	if ( queryParams.get( 'theme' ) ) {
 		if ( queryParams.get( 'theme' ) === _wpCustomizeControlsL10n.activeTheme ) { // active theme
-			history.replaceState( null, '', window.location.pathname );
+			history.replaceState( null, '', encodeURI( window.location.pathname ) );
 		} else {
 			queryParams.delete( 'return' );
 			newUrl = window.location.pathname + ( queryParams.toString() ? '?' + queryParams.toString() : '' ) + ( hash ? '#' + hash : '' );
-			history.replaceState( null, '', newUrl );
+			history.replaceState( null, '', encodeURI( newUrl ) );
 			saveButton.disabled = false;
 			saveButton.textContent = _wpCustomizeControlsL10n.activate;
 		}
@@ -164,7 +165,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	} else {
 		queryParams.delete( 'return' );
 		newUrl = window.location.pathname + ( queryParams.toString() ? '?' + queryParams.toString() : '' ) + ( hash ? '#' + hash : '' );
-		history.replaceState( null, '', newUrl );
+		history.replaceState( null, '', encodeURI( newUrl ) );
 	}
 
 	document.getElementById( 'customize-preview-loading' ).classList.add( 'hidden' );
@@ -592,12 +593,16 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			throw new Error( response.status );
 		} )
 		.then( function( result ) {
+			const ul = document.createElement( 'ul' );
 			if ( i === 1 ) {
 				themesGrid.innerHTML = ''; // clear the current grid
 			}
 
 			// Populate grid with new items
-			themesGrid.insertAdjacentHTML( 'beforeend', convertThemeLinksToButtons( result.data.html ) );
+			ul.setHTML( convertThemeLinksToButtons( result.data.html ), {
+				sanitizer: {}
+			} );
+			themesGrid.insertAdjacentHTML( 'beforeend', ul.innerHTML );
 			orgThemes = document.querySelectorAll( '.wp-org .themes li' );
 			orgThemes.forEach( function( theme ) {
 				theme.style.marginRight = '2%';
@@ -678,14 +683,14 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			// Keep installation within Customizer
 			const customizeUrl = result.data?.customizeUrl || themeUrl;
 			if ( customizeUrl ) {
-				window.location = customizeUrl;
+				window.location = encodeURI( customizeUrl );
 				return;
 			}
 
 			// Fallback to installing within regular themes page in admin
 			const activateUrl = result.data?.activateUrl;
 			if ( activateUrl ) {
-				window.location = activateUrl;
+				window.location = encodeURI( activateUrl );
 				return;
 			}
 		} )
@@ -2437,7 +2442,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			if ( e.target.className === 'preview' ) {
 				e.target.style.display = 'none';
 				e.target.previousElementSibling.style.display = 'block';
-				if ( window.location.hash === '#sub-accordion-section-themes' ) {
+				if ( hash === 'sub-accordion-section-themes' ) {
 					document.querySelector( '.customize-themes-full-container' ).style.display = 'block';
 				} else {
 					previewFrame.style.zIndex = '10';

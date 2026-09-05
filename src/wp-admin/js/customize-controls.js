@@ -13,39 +13,40 @@ _wpUpdatesSettings, _wpThemeSettings */
 
 document.addEventListener( 'DOMContentLoaded', function() {
 	window.newMenuItemIDs = window.newMenuItemIDs || [];
-	var addButton, pond, leftSidebar, customizeButton, orgThemes, newUrl,
+
+	const dialog = document.getElementById( 'widget-modal' ),
+		customizerControls = [...document.getElementById( 'customize-theme-controls' ).children],
+		form = document.querySelector( 'form' ),
+		saveButton = document.getElementById( 'save' ),
+		publishSettings = document.getElementById( 'publish-settings' ),
+		publishSettingsPanel = document.getElementById( 'sub-accordion-section-publish_settings' ),
+		menuToEdit = document.getElementById( 'menu-to-edit' ),
+		availableMenuItems = document.getElementById( 'available-menu-items' ),
+		previewFrame = document.getElementById( 'customize-preview' ),
+		availableWidgets = document.getElementById( 'widgets-left' ),
+		devicesWrapper = document.querySelector( '.devices' ),
+		buttons = devicesWrapper?.querySelectorAll( 'button[data-device]' ),
+		section = document.getElementById( 'sub-accordion-section-custom_css' ),
+		colorSchemeInputs = form.querySelectorAll( 'input[name="_customize-radio-colorscheme"]' ),
+		hueControl = form.querySelector( 'li[data-setting-id="colorscheme_hue"]' );
+
+	let addButton, pond, leftSidebar, customizeButton, orgThemes, newUrl,
 		intersectionObserver,
 		i = 1,
-		customizerControls = [...document.getElementById( 'customize-theme-controls' ).children],
 		{ FilePond } = window, // import FilePond
 		cropContext = false,
-		dialog = document.getElementById( 'widget-modal' ),
 		installedThemesHTML = document.querySelector( '.themes')?.innerHTML,
 		reducedMotionMediaQuery = window.matchMedia( '(prefers-reduced-motion: reduce)' ),
 		isReducedMotion = reducedMotionMediaQuery.matches,
-		form = document.querySelector( 'form' ),
 		inputs = form.querySelectorAll( 'input, select, textarea' ),
-		saveButton = form.querySelector( '#save' ),
-		publishSettings = form.querySelector( '#publish-settings' ),
-		publishSettingsPanel = document.getElementById( 'sub-accordion-section-publish_settings' ),
-		devicesWrapper = document.querySelector( '.devices' ),
-		buttons = devicesWrapper?.querySelectorAll( 'button[data-device]' ),
-		previewFrame = document.getElementById( 'customize-preview' ),
 		queryParams = new URLSearchParams( window.location.search ),
 		addMenuButtons = document.querySelectorAll( '.add-new-menu-item' ),
-		availableMenuItems = document.getElementById( 'available-menu-items' ),
 		addWidgetButtons = document.querySelectorAll( '.add-new-widget' ),
 		newMenuItemIDs = window.newMenuItemIDs,
-		availableWidgets = document.getElementById( 'widgets-left' ),
-		menuToEdit = document.getElementById( 'menu-to-edit' ),
 		hash = window.location.hash.replace( '#', '' ),
 		targetEl = document.getElementById( hash ),
-		section = document.getElementById( 'sub-accordion-section-custom_css' ),
 		discardingChangeset = false,
 		changesetStatus = window._wpCustomizeChangesetStatus || 'publish';
-
-	const colorSchemeInputs = form.querySelectorAll( 'input[name="_customize-radio-colorscheme"]' ),
-		hueControl = form.querySelector( 'li[data-setting-id="colorscheme_hue"]' );
 
 	// Go direct to appropriate Customizer panel if its hash is specified in the URL
 	if ( hash === 'menu-to-edit' ) {

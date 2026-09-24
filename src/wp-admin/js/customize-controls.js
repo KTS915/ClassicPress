@@ -1301,7 +1301,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 		// Set menu_order, media_category, and media_post_tag field IDs correctly
 		setAddedMediaFields( id );
-
+console.log('yowser');
 		// Populate modal with attachment details
 		dialog.querySelector( '.attachment-date' ).textContent = date;
 		dialog.querySelector( '.attachment-filename' ).textContent = filename;
@@ -1424,16 +1424,16 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		} else {
 			if ( attachment.type === 'application' ) {
 				if ( attachment.subtype === 'vnd.openxmlformats-officedocument.spreadsheetml.sheet' ) {
-					img.src = _wpMediaGridSettings.includes_url + 'images/media/spreadsheet.png';
+					img.src = _wpCustomizeControlsL10n.includes_url + 'images/media/spreadsheet.png';
 				} else if ( attachment.subtype === 'zip' ) {
-					img.src = _wpMediaGridSettings.includes_url + 'images/media/archive.png';
+					img.src = _wpCustomizeControlsL10n.includes_url + 'images/media/archive.png';
 				} else {
-					img.src = _wpMediaGridSettings.includes_url + 'images/media/document.png';
+					img.src = _wpCustomizeControlsL10n.includes_url + 'images/media/document.png';
 				}
 			} else if ( attachment.type === 'audio' ) {
-				img.src = _wpMediaGridSettings.includes_url + 'images/media/audio.png';
+				img.src = _wpCustomizeControlsL10n.includes_url + 'images/media/audio.png';
 			} else if ( attachment.type === 'video' ) {
-				img.src = _wpMediaGridSettings.includes_url + 'images/media/video.png';
+				img.src = _wpCustomizeControlsL10n.includes_url + 'images/media/video.png';
 			}
 
 			centered.className = 'centered';
@@ -1453,6 +1453,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		gridItem.setAttribute( 'role', 'checkbox' );
 		gridItem.setAttribute( 'aria-checked', 'false' );
 		gridItem.setAttribute( 'aria-label', attachment.title );
+		gridItem.setAttribute( 'data-id', attachment.id );
 		gridItem.setAttribute( 'data-date', attachment.dateFormatted );
 		gridItem.setAttribute( 'data-url', attachment.url );
 		gridItem.setAttribute( 'data-filename', attachment.filename );
@@ -1480,7 +1481,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		button.tabIndex = -1;
 		spanIcon.className = 'media-modal-icon';
 		spanSRT.className =  'screen-reader-text';
-		spanSRT.textContent = _wpMediaGridSettings.deselect;
+		spanSRT.textContent = _wpCustomizeControlsL10n.deselect;
 
 		thumbnail.append( image );
 		wrapper.append( thumbnail );
@@ -1811,7 +1812,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	 * @return {void}
 	 */
 	function addItemToCustomizer( selectedItem, attachmentId, imageElement, imageUrl, attachment ) {
-		var headerData, headerUrl,
+		var headerData, headerUrl, videoElement, videoData,
 			parent = selectedItem.classList.contains( 'choice' ) ? selectedItem.closest( '.choices' ) : customizeButton.parentNode,
 			grandparent = parent.parentNode,
 			li = parent.closest( 'li' ),
@@ -1822,6 +1823,8 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		if ( ! parent ) {
 			return;
 		}
+
+		attachmentId = parseInt( attachmentId );
 
 		removeButton.className = 'button remove-button';
 		removeButton.type = 'button';
@@ -1875,13 +1878,48 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 				_updatedControlsWatcher.header_image = headerUrl;
 				_updatedControlsWatcher[ settingId ] = {
-					attachment_id: parseInt( attachmentId ),
+					attachment_id: attachmentId,
 					url:           attachment ? attachment.url : imageUrl,
 					thumbnail_url: attachment ? ( attachment.sizes?.thumbnail?.url || attachment.url ) : ( selectedItem.dataset.sizes?.thumbnail?.url || imageUrl ),
 					width:         attachment ? attachment.width  : selectedItem.dataset.width,
 					height:        attachment ? attachment.height : selectedItem.dataset.height
 				};
 			}
+
+			setTimeout( function() {
+				if ( document.getElementById( 'customize-control-header_video' ).querySelector( 'video' ) ) {
+					document.getElementById( 'customize-control-header_video' ).querySelector( '.remove-button' ).click();
+				}
+				selectButton.focus();
+			}, 0 );
+
+		// Update header video
+		} else if ( settingId === 'header_video' ) {
+			if ( ! selectedItem.dataset.url ) {
+				return;
+			}
+
+			videoElement = document.createElement( 'video' );
+			videoElement.src = selectedItem.dataset.url;
+
+			if ( li.querySelector( '.mejs-video' ) ) {
+				li.querySelector( '.mejs-offscreen' ).remove();
+				li.querySelector( '.mejs-video' ).replaceWith( videoElement );
+			} else {
+				grandparent.before( videoElement );
+				parent.prepend( removeButton );
+				customizeButton.replaceWith( selectButton );
+			}
+
+			window.sendSettingToPreview( 'header_video', attachmentId );
+			_updatedControlsWatcher.header_video = attachmentId;
+
+			setTimeout( function() {
+				if ( document.getElementById( 'customize-control-header_image' ).querySelector( 'img' ) ) {
+					document.getElementById( 'customize-control-header_image' ).querySelector( '.remove' ).click();
+				}
+				selectButton.focus();
+			}, 0 );
 
 		// Update site icon
 		} else if ( settingId === 'site_icon' ) {
@@ -1990,7 +2028,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			} else {
 				grandparent.querySelector( 'img' )?.remove();
 				grandparent.querySelector( 'video' )?.remove();
-				grandparent.querySelector( 'input' ).value = '';
+				grandparent.closest( 'li' ).querySelector( '.mejs-offscreen' )?.remove();
+				grandparent.closest( 'li' ).querySelector( '.mejs-video' )?.remove();
+				if ( grandparent.querySelector( 'input' ) ) {
+					grandparent.querySelector( 'input' ).value = '';
+				}
 			}
 			parent.innerHTML = '';
 			parent.append( button );
@@ -2698,7 +2740,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	 * @abstract
 	 * @return {void}
 	 */
-	document.addEventListener( 'click', function( e ) {
+	document.addEventListener( 'click', function( e ) {console.log(e.target);
 		var id, page, itemBrowse, itemUpload, gridPanel, uploadPanel,
 			modalButtons, rightSidebar, modalPages, description,
 			selectedItem, image,
@@ -2925,23 +2967,26 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			e.preventDefault();
 			sidebarCollapseExpand( e.target.parentNode );
 
-		// Remove media file
-		} else if ( e.target.tagName === 'BUTTON' && ( e.target.classList.contains( 'remove' ) || e.target.classList.contains( 'remove-button' ) ) ) {
-			customizeButton = e.target;
-			removeMedia();
+		} else if ( ! dialog.querySelector( '#widget-modal-media-content' ) && e.target.tagName === 'BUTTON' ) {
 
-		// Add media file
-		} else if ( e.target.tagName === 'BUTTON' && e.target.classList.contains( 'select-button' ) ) {
-			customizeButton = e.target;
-			if ( e.target.closest( 'li' ).dataset.settingId.includes( 'image' ) ) {
-				cropContext = e.target.closest( 'li' ).dataset.settingId;
+			// Remove media file
+			if ( e.target.classList.contains( 'remove' ) || e.target.classList.contains( 'remove-button' ) ) {
+				customizeButton = e.target;
+				removeMedia();
+
+			// Add media file
+			} else if ( e.target.classList.contains( 'select-button' ) ) {
+				customizeButton = e.target;
+				if ( e.target.closest( 'li' ).dataset.settingId.includes( 'image' ) ) {
+					cropContext = e.target.closest( 'li' ).dataset.settingId;
+				}
+				selectMedia();
+			} else if ( e.target.classList.contains( 'random-default-header' ) ) {
+				setRandomHeaderChoice( e.target.dataset.customizeImageValue );
+			} else if ( e.target.classList.contains( 'choice' ) ) {
+				image = e.target.previousElementSibling;
+				addItemToCustomizer( e.target, 0, image, image.src );
 			}
-			selectMedia();
-		} else if ( e.target.tagName === 'BUTTON' && e.target.classList.contains( 'random-default-header' ) ) {
-			setRandomHeaderChoice( e.target.dataset.customizeImageValue );
-		} else if ( e.target.tagName === 'BUTTON' && e.target.classList.contains( 'choice' ) ) {
-			image = e.target.previousElementSibling;
-			addItemToCustomizer( e.target, 0, image, image.src );
 
 		// Close the modal
 		} else if ( e.target.id === 'widget-modal-close' ) {

@@ -418,6 +418,17 @@
 
 			video.src = url;
 		},
+		external_header_video: function( url ) {
+			var header = document.querySelector( '.custom-header' ),
+				video = header.querySelector( 'video' );
+
+			if ( ! video ) {
+				video = document.createElement( 'video' );
+				header.prepend( video );
+			}
+
+			video.src = url;
+		},
 		custom_css: function( value ) {
 			var el = document.getElementById( 'wp-custom-css' );
 			if ( el ) {

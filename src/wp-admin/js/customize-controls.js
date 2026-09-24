@@ -2933,7 +2933,9 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		// Add media file
 		} else if ( e.target.tagName === 'BUTTON' && e.target.classList.contains( 'select-button' ) ) {
 			customizeButton = e.target;
-			cropContext = e.target.closest( 'li' ).dataset.settingId;
+			if ( e.target.closest( 'li' ).dataset.settingId.includes( 'image' ) ) {
+				cropContext = e.target.closest( 'li' ).dataset.settingId;
+			}
 			selectMedia();
 		} else if ( e.target.tagName === 'BUTTON' && e.target.classList.contains( 'random-default-header' ) ) {
 			setRandomHeaderChoice( e.target.dataset.customizeImageValue );

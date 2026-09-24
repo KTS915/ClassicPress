@@ -824,6 +824,13 @@
 			);
 		}
 
+		// External header video
+		if ( api._settings.external_header_video ) {
+			api._settings.external_header_video.bind(
+				api.settingPreviewHandlers.external_header_video
+			);
+		}
+
 		// Custom CSS
 		cssSettingId = 'custom_css[' + api.settings.theme.stylesheet + ']';
 		if ( api._settings[ cssSettingId ] ) {

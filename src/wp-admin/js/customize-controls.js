@@ -1287,7 +1287,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 			url = item.dataset.url,
 			sizes = item.dataset.sizes,
 			sizeOptions = '',
-			sizesObject = JSON.parse( sizes ),
+			sizesObject = sizes ? JSON.parse( sizes ) : '',
 			alt = item.querySelector( 'img' ).getAttribute( 'alt' ),
 			updateNonce = item.dataset.updateNonce,
 			deleteNonce = item.dataset.deleteNonce,
@@ -1405,17 +1405,54 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	 * @return {void}
 	 */
 	function populateGridItem( attachment ) {
-		var selected = '',
-			gridItem = document.createElement( 'li' ),
-			image = '<img src="' + attachment.url + '" alt="' + attachment.alt + '">';
+		const gridItem = document.createElement( 'li' ),
+			wrapper = document.createElement( 'div' ),
+			thumbnail = document.createElement( 'div' ),
+			button = document.createElement( 'button' ),
+			spanIcon = document.createElement( 'span' ),
+			spanSRT = document.createElement( 'span' ),
+			centered = document.createElement( 'div' ),
+			filename = document.createElement( 'div' ),
+			title = document.createElement( 'div' ),
+			img = new Image();
 
-		gridItem.className = 'media-item' + selected;
+		let image;
+		if ( attachment.type === 'image' ) {
+			image = new Image();
+			image.src = attachment.url;
+			image.alt = attachment.alt;
+		} else {
+			if ( attachment.type === 'application' ) {
+				if ( attachment.subtype === 'vnd.openxmlformats-officedocument.spreadsheetml.sheet' ) {
+					img.src = _wpMediaGridSettings.includes_url + 'images/media/spreadsheet.png';
+				} else if ( attachment.subtype === 'zip' ) {
+					img.src = _wpMediaGridSettings.includes_url + 'images/media/archive.png';
+				} else {
+					img.src = _wpMediaGridSettings.includes_url + 'images/media/document.png';
+				}
+			} else if ( attachment.type === 'audio' ) {
+				img.src = _wpMediaGridSettings.includes_url + 'images/media/audio.png';
+			} else if ( attachment.type === 'video' ) {
+				img.src = _wpMediaGridSettings.includes_url + 'images/media/video.png';
+			}
+
+			centered.className = 'centered';
+			img.alt = '';
+			img.setAttribute( 'draggable', 'false' );
+			centered.append( img );
+			title.textContent = attachment.title;
+			filename.append( title );
+			image = document.createElement( 'div' );
+			image.className = 'icon';
+			image.append( centered, filename );
+		}
+
+		gridItem.className = 'media-item';
 		gridItem.id = 'media-' + attachment.id;
 		gridItem.setAttribute( 'tabindex', 0 );
 		gridItem.setAttribute( 'role', 'checkbox' );
-		gridItem.setAttribute( 'aria-checked', selected ? true : false );
+		gridItem.setAttribute( 'aria-checked', 'false' );
 		gridItem.setAttribute( 'aria-label', attachment.title );
-		gridItem.setAttribute( 'data-id', attachment.id );
 		gridItem.setAttribute( 'data-date', attachment.dateFormatted );
 		gridItem.setAttribute( 'data-url', attachment.url );
 		gridItem.setAttribute( 'data-filename', attachment.filename );
@@ -1424,6 +1461,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		gridItem.setAttribute( 'data-width', attachment.width );
 		gridItem.setAttribute( 'data-height', attachment.height );
 		gridItem.setAttribute( 'data-size', attachment.filesizeHumanReadable );
+		gridItem.setAttribute( 'data-sizes', attachment.sizes ? JSON.stringify( attachment.sizes ) : '' );
 		gridItem.setAttribute( 'data-caption', attachment.caption );
 		gridItem.setAttribute( 'data-description', attachment.description );
 		gridItem.setAttribute( 'data-link', attachment.link );
@@ -1431,18 +1469,23 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		gridItem.setAttribute( 'data-menu-order', attachment.menuOrder );
 		gridItem.setAttribute( 'data-taxes', attachment.media_cats );
 		gridItem.setAttribute( 'data-tags', attachment.media_tags );
-		gridItem.setAttribute( 'data-sizes', JSON.stringify( attachment.sizes ) );
 		gridItem.setAttribute( 'data-update-nonce', attachment.nonces.update );
 		gridItem.setAttribute( 'data-delete-nonce', attachment.nonces.delete );
 		gridItem.setAttribute( 'data-edit-nonce', attachment.nonces.edit );
 
-		gridItem.innerHTML = '<div class="select-attachment-preview type-' + attachment.type + ' subtype-' + attachment.subtype + '">' +
-			'<div class="media-thumbnail">' + image + '</div>' +
-			'</div>' +
-			'<button type="button" class="check" tabindex="-1">' +
-			'<span class="media-modal-icon"></span>' +
-			'<span class="screen-reader-text">' + IMAGE_WIDGET.deselect + '></span>' +
-			'</button>';
+		wrapper.className = 'select-attachment-preview type-' + attachment.type + ' subtype-' + attachment.subtype;
+		thumbnail.className = 'media-thumbnail';
+		button.type = 'button';
+		button.className = 'check';
+		button.tabIndex = -1;
+		spanIcon.className = 'media-modal-icon';
+		spanSRT.className =  'screen-reader-text';
+		spanSRT.textContent = _wpMediaGridSettings.deselect;
+
+		thumbnail.append( image );
+		wrapper.append( thumbnail );
+		button.append( spanIcon, spanSRT );
+		gridItem.append( wrapper, button );
 
 		return gridItem;
 	}

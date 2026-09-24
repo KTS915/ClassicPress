@@ -407,6 +407,17 @@
 		custom_logo: function( attachmentId ) {
 			document.body.classList.toggle( 'wp-custom-logo', !! attachmentId );
 		},
+		header_video: function( url ) {
+			var header = document.querySelector( '.custom-header' ),
+				video = header.querySelector( 'video' );
+
+			if ( ! video ) {
+				video = document.createElement( 'video' );
+				header.prepend( video );
+			}
+
+			video.src = url;
+		},
 		custom_css: function( value ) {
 			var el = document.getElementById( 'wp-custom-css' );
 			if ( el ) {
@@ -793,6 +804,13 @@
 		if ( api._settings.custom_logo ) {
 			api.settingPreviewHandlers.custom_logo( api._settings.custom_logo.get() );
 			api._settings.custom_logo.bind( api.settingPreviewHandlers.custom_logo );
+		}
+
+		// Header video
+		if ( api._settings.header_video ) {
+			api._settings.header_video.bind(
+				api.settingPreviewHandlers.header_video
+			);
 		}
 
 		// Custom CSS

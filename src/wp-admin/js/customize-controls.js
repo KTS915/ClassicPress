@@ -1301,7 +1301,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 		// Set menu_order, media_category, and media_post_tag field IDs correctly
 		setAddedMediaFields( id );
-console.log('yowser');
+
 		// Populate modal with attachment details
 		dialog.querySelector( '.attachment-date' ).textContent = date;
 		dialog.querySelector( '.attachment-filename' ).textContent = filename;
@@ -1895,6 +1895,34 @@ console.log('yowser');
 
 		// Update header video
 		} else if ( settingId === 'header_video' ) {
+			if ( ! selectedItem.dataset.url ) {
+				return;
+			}
+
+			videoElement = document.createElement( 'video' );
+			videoElement.src = selectedItem.dataset.url;
+
+			if ( li.querySelector( '.mejs-video' ) ) {
+				li.querySelector( '.mejs-offscreen' ).remove();
+				li.querySelector( '.mejs-video' ).replaceWith( videoElement );
+			} else {
+				grandparent.before( videoElement );
+				parent.prepend( removeButton );
+				customizeButton.replaceWith( selectButton );
+			}
+
+			window.sendSettingToPreview( 'header_video', selectedItem.dataset.url );
+			_updatedControlsWatcher.header_video = attachmentId;
+
+			setTimeout( function() {
+				if ( document.getElementById( 'customize-control-header_image' ).querySelector( 'img' ) ) {
+					document.getElementById( 'customize-control-header_image' ).querySelector( '.remove' ).click();
+				}
+				selectButton.focus();
+			}, 0 );
+
+		// Update external header video
+		} else if ( settingId === 'external_header_video' ) {
 			if ( ! selectedItem.dataset.url ) {
 				return;
 			}
@@ -2740,7 +2768,7 @@ console.log('yowser');
 	 * @abstract
 	 * @return {void}
 	 */
-	document.addEventListener( 'click', function( e ) {console.log(e.target);
+	document.addEventListener( 'click', function( e ) {
 		var id, page, itemBrowse, itemUpload, gridPanel, uploadPanel,
 			modalButtons, rightSidebar, modalPages, description,
 			selectedItem, image,
